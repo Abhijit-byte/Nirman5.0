@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCord Doctor - Secure Login</title>
+    <title>LifeCord Pharmacy - Partner Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,6 +11,7 @@
     <style>
         /* --- THEME CONFIGURATION --- */
         :root {
+            /* Using LifeCord Orange brand for consistency */
             --primary: #FF6B35;
             --primary-dark: #E64A19;
             --gradient-primary: linear-gradient(135deg, #FF8C42 0%, #FF5E3A 100%);
@@ -23,13 +24,13 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        /* Mobile-First Base Layout - Allows scrolling if needed */
+        /* Mobile-First Base Layout */
         body { 
             min-height: 100vh; 
             width: 100%; 
             display: flex; 
             background-color: var(--bg-body);
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
         }
 
         /* --- SPLIT LAYOUT --- */
@@ -46,12 +47,11 @@
             padding: 60px;
             color: white;
             overflow: hidden;
-            height: 100vh; /* Full height fixed for desktop brand side */
+            height: 100vh;
             position: sticky;
             top: 0;
         }
         
-        /* Abstract background shapes */
         .brand-section::before {
             content: ''; position: absolute; top: -10%; right: -10%; width: 400px; height: 400px;
             background: rgba(255,255,255,0.1); border-radius: 50%;
@@ -78,7 +78,7 @@
             align-items: center;
             padding: 40px;
             position: relative;
-            min-height: 100vh; /* Ensure full height */
+            min-height: 100vh;
         }
 
         .login-card {
@@ -107,14 +107,12 @@
             transition: 0.2s;
         }
         
-        /* Input Focus State */
         .form-input:focus { border-color: var(--primary); }
         .form-input:focus + .form-label,
         .form-input:not(:placeholder-shown) + .form-label {
             top: -10px; font-size: 0.8rem; color: var(--primary); font-weight: 600;
         }
 
-        /* Password Toggle */
         .password-toggle {
             position: absolute; right: 15px; top: 15px;
             color: var(--text-muted); cursor: pointer;
@@ -139,7 +137,6 @@
         .footer-links { margin-top: 30px; text-align: center; font-size: 0.9rem; color: var(--text-muted); }
         .footer-links a { color: var(--primary); font-weight: 600; text-decoration: none; }
 
-        /* Security Badge */
         .security-badge {
             margin-top: 40px;
             display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -165,24 +162,54 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* --- RESPONSIVE --- */
+        /* --- RESPONSIVE MOBILE THEME --- */
         @media (max-width: 900px) {
-            .brand-section { display: none; } /* Hide decorative side on mobile */
+            .brand-section { display: none; }
             
             .login-section { 
                 width: 100%; 
-                background: var(--bg-body); 
-                padding: 20px; /* Less padding on mobile */
+                background: #FDFDFD; 
+                padding: 0;
+                align-items: flex-start;
+            }
+
+            .login-section::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 280px;
+                background: var(--gradient-primary);
+                border-bottom-left-radius: 40px;
+                border-bottom-right-radius: 40px;
+                z-index: 0;
+            }
+
+            .login-section::after {
+                content: 'LifeCord Pharmacy';
+                position: absolute;
+                top: 60px; left: 0; width: 100%;
+                text-align: center;
+                color: white;
+                font-size: 1.8rem;
+                font-weight: 800;
+                z-index: 1;
+                letter-spacing: -0.5px;
             }
             
             .login-card { 
                 background: white; 
-                border-radius: 20px; 
-                padding: 30px 20px; 
-                box-shadow: var(--shadow); 
+                border-radius: 24px; 
+                padding: 40px 30px; 
+                box-shadow: 0 20px 60px rgba(0,0,0,0.15); 
+                margin: 140px auto 40px auto;
+                width: 90%;
+                position: relative;
+                z-index: 2;
             }
             
-            .login-header h2 { font-size: 1.8rem; }
+            .login-header { text-align: center; margin-bottom: 30px; }
+            .login-header h2 { font-size: 1.6rem; }
+
+            .security-badge { position: relative; bottom: 0; margin-bottom: 30px; width: 100%; }
         }
 
     </style>
@@ -191,16 +218,16 @@
 
     <div class="split-container">
         
-        <!-- LEFT: Branding (Hidden on Mobile) -->
+        <!-- LEFT: Branding -->
         <div class="brand-section">
             <div class="brand-content">
-                <div class="brand-logo"><i class="fas fa-heartbeat"></i> LifeCord Doc</div>
-                <p class="brand-desc">The Next-Gen Clinical Operating System.</p>
+                <div class="brand-logo"><i class="fas fa-pills"></i> LifeCord Pharmacy</div>
+                <p class="brand-desc">Smart inventory, instant billing, and digital prescriptions.</p>
                 <ul class="feature-list">
-                    <li><i class="fas fa-magic"></i> AI Ambient Scribe</li>
-                    <li><i class="fas fa-chart-line"></i> Real-time Vitals Monitoring</li>
-                    <li><i class="fas fa-shield-alt"></i> HIPAA Compliant Security</li>
-                    <li><i class="fas fa-user-md"></i> Seamless Digital Prescriptions</li>
+                    <li><i class="fas fa-boxes"></i> Real-time Stock Management</li>
+                    <li><i class="fas fa-file-prescription"></i> Digital Prescription Access</li>
+                    <li><i class="fas fa-exclamation-triangle"></i> Automated Expiry Alerts</li>
+                    <li><i class="fas fa-file-invoice-dollar"></i> Integrated Billing & Claims</li>
                 </ul>
             </div>
         </div>
@@ -209,21 +236,21 @@
         <div class="login-section">
             <div class="login-card">
                 <div class="login-header">
-                    <h2>Welcome Back</h2>
-                    <p>Enter your unique ID to access your dashboard.</p>
+                    <h2>Pharmacy Login</h2>
+                    <p>Enter your store credentials to continue.</p>
                 </div>
 
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     
-                    <!-- UID Input -->
+                    <!-- Pharmacy UID Input -->
                     <div class="form-group">
-                        <input type="number" name="doc_id" id="docUid" class="form-input" placeholder=" " required>
-                        <label class="form-label">Doctor UID (e.g. DOC-1023)</label>
+                        <input type="text" id="pharmId" class="form-input" placeholder=" " required>
+                        <label class="form-label">Pharmacy UID (e.g. PH-9921)</label>
                     </div>
 
                     <!-- Password Input -->
                     <div class="form-group">
-                        <input type="number" name="pin" id="docPass" class="form-input" placeholder=" " required>
+                        <input type="password" id="pharmPass" class="form-input" placeholder=" " required>
                         <label class="form-label">Password</label>
                         <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
                     </div>
@@ -237,18 +264,17 @@
                     </div>
 
                     <!-- Button -->
-                    <button type="submit" class="btn-login">Secure Login <i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
+                    <button type="submit" class="btn-login" onclick="window.location.href='{% url 'pharmacy_dashboard' %}'">Login to Store <i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
 
                 </form>
 
-                <!-- Removed Registration Links -->
                 <div class="footer-links">
                     <p><a href="#" onclick="openModal('supportModal')">Need Technical Help?</a></p>
                 </div>
             </div>
 
             <div class="security-badge">
-                <i class="fas fa-lock"></i> 256-bit SSL Encrypted
+                <i class="fas fa-shield-alt"></i> Verified Pharmacy Network
             </div>
         </div>
 
@@ -257,12 +283,12 @@
     <!-- Forgot Password Modal -->
     <div id="forgotModal" class="modal-overlay">
         <div class="modal-box">
-            <div style="color:var(--primary); font-size:3rem; margin-bottom:10px;"><i class="fas fa-key"></i></div>
-            <h3 style="font-size:1.5rem; margin-bottom:10px;">Reset Password</h3>
-            <p style="color:var(--text-muted); margin-bottom:20px;">Enter your registered email or Doctor UID to receive a reset link.</p>
+            <div style="color:var(--primary); font-size:3rem; margin-bottom:10px;"><i class="fas fa-unlock-alt"></i></div>
+            <h3 style="font-size:1.5rem; margin-bottom:10px;">Recover Access</h3>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Enter your Pharmacy UID or registered email.</p>
             <div class="form-group" style="text-align:left;">
                 <input type="text" class="form-input" placeholder=" " id="resetInput">
-                <label class="form-label">Email or UID</label>
+                <label class="form-label">UID / Email</label>
             </div>
             <button class="btn-login" onclick="simulateReset()">Send Reset Link</button>
             <button class="btn-login" style="background:transparent; color:var(--text-muted); box-shadow:none; margin-top:5px;" onclick="closeModal('forgotModal')">Cancel</button>
@@ -273,8 +299,8 @@
     <div id="supportModal" class="modal-overlay">
         <div class="modal-box">
             <div style="color:var(--text-main); font-size:3rem; margin-bottom:10px;"><i class="fas fa-headset"></i></div>
-            <h3 style="font-size:1.5rem; margin-bottom:10px;">Support Team</h3>
-            <p style="color:var(--text-muted); margin-bottom:20px;">Call us at <strong>+91-1800-LIFE-CORD</strong> or email support@lifecord.com</p>
+            <h3 style="font-size:1.5rem; margin-bottom:10px;">Pharmacy Support</h3>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Contact our merchant support line at <strong>+91-1800-LC-PHARM</strong></p>
             <button class="btn-login" onclick="closeModal('supportModal')">Close</button>
         </div>
     </div>
@@ -282,7 +308,7 @@
     <script>
         // --- PASSWORD TOGGLE ---
         function togglePassword() {
-            const passInput = document.getElementById('docPass');
+            const passInput = document.getElementById('pharmPass');
             const icon = document.querySelector('.password-toggle');
             if (passInput.type === 'password') {
                 passInput.type = 'text';
@@ -297,30 +323,24 @@
 
         // --- LOGIN LOGIC ---
         function handleLogin(e) {
-    e.preventDefault();
+            e.preventDefault();
+            const uid = document.getElementById('pharmId').value.trim();
+            const pass = document.getElementById('pharmPass').value;
 
-    const uid = document.getElementById("docUid").value.trim();
-    const pin = document.getElementById("docPass").value.trim();
+            if(uid && pass) {
+                const btn = document.querySelector('.btn-login');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Authenticating...';
+                btn.style.opacity = '0.8';
 
-    fetch("/doctor_login/", {   // <-- URL in urls.py must match
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: JSON.stringify({ doc_id: uid, pin: pin })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            window.location.href = data.redirect_url;   // redirect to dashboard
-        } else {
-            alert(data.message);
+                setTimeout(() => {
+                    alert(`Welcome Pharmacy Store #${uid}! Loading Inventory...`);
+                    // window.location.href = 'pharmacy_dashboard.html';
+                    btn.innerHTML = originalText;
+                    btn.style.opacity = '1';
+                }, 1500);
+            }
         }
-    })
-    .catch(error => console.error("Error:", error));
-}
-
 
         // --- MODALS ---
         function openModal(id) {
@@ -334,11 +354,11 @@
         function simulateReset() {
             const input = document.getElementById('resetInput').value;
             if(!input) {
-                alert("Please enter your Email or UID.");
+                alert("Please enter your UID or Email.");
                 return;
             }
             closeModal('forgotModal');
-            alert(`✅ Password reset link sent to ${input}`);
+            alert(`✅ Recovery instructions sent to ${input}`);
         }
 
         // Close modal on outside click

@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeCord | AI Bill Analyzer</title>
+    <!-- Poppins Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #3A7BFF;
+            --primary-dark: #2563eb;
+            --accent: #F97316;
+            --bg-body: #f0f4f8;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 16px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 80px; /* Space for bottom nav if needed */
+        }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .font-bold { font-weight: 700; }
+        .font-medium { font-weight: 500; }
+        .text-primary { color: var(--primary); }
+        .text-accent { color: var(--accent); }
+        .text-danger { color: var(--danger); }
+        .text-success { color: var(--success); }
+        .w-full { width: 100%; }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Layout Grid */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                grid-template-columns: 2fr 1fr; /* Inputs/Issues Left, Summary/Rights Right */
+            }
+            .full-width-on-desktop {
+                grid-column: 1 / -1;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: transform 0.2s;
+            position: relative;
+        }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            border-radius: var(--radius);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .hero h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .hero p { opacity: 0.9; font-weight: 300; font-size: 0.95rem; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Input Form */
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: #f8fafc;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            background: white;
+        }
+
+        /* Dynamic Table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px; /* Force scroll on mobile */
+        }
+        th {
+            background: #f1f5f9;
+            text-align: left;
+            padding: 12px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        td input, td select {
+            padding: 8px;
+            border: 1px solid transparent;
+            background: transparent;
+        }
+        td input:hover, td select:hover {
+            border-color: #e2e8f0;
+            background: white;
+        }
+        .btn-delete {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-secondary { background: white; border: 1px solid #cbd5e1; color: var(--text-main); }
+        .btn-outline { border: 1px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-purple { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; }
+        .btn-teal { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); color: white; }
+        
+        .btn-ai {
+            background: linear-gradient(135deg, #3A7BFF 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+        }
+        .btn-ai:hover {
+            filter: brightness(1.1);
+        }
+
+        /* File Upload */
+        .file-drop {
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius);
+            padding: 3rem;
+            text-align: center;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        .file-drop:hover { border-color: var(--primary); background: #f8fafc; }
+
+        /* Result Cards */
+        .score-card {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+        }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 8px solid #e2e8f0;
+            margin: 0 auto 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+        }
+        .score-circle.good { border-color: var(--success); color: var(--success); }
+        .score-circle.medium { border-color: var(--warning); color: var(--warning); }
+        .score-circle.bad { border-color: var(--danger); color: var(--danger); }
+
+        .summary-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #f1f5f9;
+        }
+        .stat-item h4 { font-size: 0.8rem; color: var(--text-light); font-weight: 500; }
+        .stat-item p { font-size: 1.1rem; font-weight: 700; }
+
+        /* Issues List */
+        .issue-filter {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            margin-bottom: 1rem;
+        }
+        .pill {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: white;
+            border: 1px solid #cbd5e1;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .pill.active { background: var(--text-main); color: white; border-color: var(--text-main); }
+
+        .issue-item {
+            background: white;
+            border: 1px solid #f1f5f9;
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #cbd5e1;
+            animation: fadeIn 0.4s ease forwards;
+        }
+        .issue-item.type-illegal { border-left-color: var(--danger); }
+        .issue-item.type-opaque { border-left-color: var(--warning); }
+        .issue-item.type-double { border-left-color: var(--primary); }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+        .bg-red-100 { background: #fee2e2; color: var(--danger); }
+        .bg-yellow-100 { background: #fef3c7; color: var(--warning); }
+        .bg-blue-100 { background: #dbeafe; color: var(--primary); }
+
+        /* Rights Panel */
+        .rights-list { list-style: none; }
+        .rights-list li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+        .rights-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* AI Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 600px;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .loading-skeleton {
+            height: 20px;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #323232;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+            font-size: 0.9rem;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon">LC</div>
+            <div class="font-bold text-lg" style="background: linear-gradient(90deg, #3A7BFF, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AI Bill Analyzer</div>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <!-- Intro Hero (Full Width) -->
+        <div class="full-width-on-desktop">
+            <section class="hero">
+                <h1>Stop Medical Overcharging</h1>
+                <p>Upload your hospital bill image or enter items manually. Our AI checks for illegal markups and vague fees.</p>
+            </section>
+        </div>
+
+        <!-- Left Column: Inputs & Issues -->
+        <main>
+            <!-- Input Card -->
+            <section class="card" id="input-section">
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('manual')">Enter Bill Manually</button>
+                    <button class="tab-btn" onclick="switchTab('upload')">Scan Bill Image ✨</button>
+                </div>
+
+                <!-- Manual Entry Form -->
+                <div id="manual-entry">
+                    <div class="table-wrapper">
+                        <table id="bill-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%">Item Name</th>
+                                    <th style="width: 20%">Category</th>
+                                    <th style="width: 10%">Qty</th>
+                                    <th style="width: 15%">Unit Price</th>
+                                    <th style="width: 15%">Total</th>
+                                    <th style="width: 5%"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- JS will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="btn btn-secondary text-sm" onclick="addItemRow()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        Add Another Item
+                    </button>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-primary" onclick="startAnalysis()">
+                            <span>Analyze Bill</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File Upload Form -->
+                <div id="file-upload" class="hidden">
+                    <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" hidden accept="image/*" onchange="handleFileSelect(this)">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
+                        <p class="font-medium text-main">Click to upload bill image</p>
+                        <p class="text-sm mt-4 text-primary" id="fileName">Supports JPG, PNG</p>
+                    </div>
+                    
+                    <div id="upload-loading" class="hidden mt-4">
+                        <div class="loading-skeleton" style="width: 100%"></div>
+                        <p class="text-center text-sm text-primary">✨ AI is reading your bill items...</p>
+                    </div>
+
+                    <p class="text-sm text-light mt-4 text-center">We use Gemini Vision to digitize your bill instantly.</p>
+                </div>
+
+            </section>
+
+            <!-- Loading State -->
+            <section id="loading-state" class="card hidden">
+                <div class="loading-skeleton" style="width: 60%"></div>
+                <div class="loading-skeleton" style="width: 80%"></div>
+                <div class="loading-skeleton" style="width: 40%"></div>
+                <p class="text-center text-sm text-light mt-4">Checking for NPPA violations & hidden charges...</p>
+            </section>
+
+            <!-- Results List (Issues) -->
+            <section id="results-details" class="hidden mt-4">
+                <h3 class="font-bold text-lg mb-4">Detailed Breakdown</h3>
+                
+                <div class="issue-filter">
+                    <button class="pill active" onclick="filterIssues('all')">All Issues</button>
+                    <button class="pill" onclick="filterIssues('illegal')">Illegal Markups</button>
+                    <button class="pill" onclick="filterIssues('opaque')">Opaque Charges</button>
+                    <button class="pill" onclick="filterIssues('double')">Double Billing</button>
+                </div>
+
+                <div id="issues-container">
+                    <!-- Issues injected here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Right Column: Summary & Rights -->
+        <aside>
+            <!-- Summary Card (Result) -->
+            <section class="card hidden" id="summary-card">
+                <div class="score-card">
+                    <div class="score-circle" id="transparency-score">
+                        <!-- Score JS -->
+                    </div>
+                    <h3 class="font-bold" id="verdict-text">Bill Analysis</h3>
+                    <p class="text-sm text-light">Bill Transparency Score</p>
+                </div>
+
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <h4>ORIGINAL</h4>
+                        <p id="original-total">₹0</p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>CORRECTED</h4>
+                        <p id="corrected-total" class="text-primary">₹0</p>
+                    </div>
+                    <div class="stat-item">
+                        <h4>SAVINGS</h4>
+                        <p id="savings-total" class="text-success">₹0</p>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col gap-2 mt-4">
+                     <button class="btn btn-ai w-full" onclick="draftDisputeEmail()">
+                        ✨ Draft Dispute Email
+                    </button>
+                    <button class="btn btn-purple w-full" onclick="simplifyBill()">
+                        ✨ Jargon Decoder
+                    </button>
+                    <button class="btn btn-teal w-full" onclick="checkInsurance()">
+                        ✨ Insurance Check
+                    </button>
+                    <button class="btn btn-outline w-full" onclick="downloadReport()">
+                        Download Report
+                    </button>
+                </div>
+            </section>
+
+            <!-- Patient Rights -->
+            <section class="card mt-4">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                    Know Your Rights
+                </h3>
+                <ul class="rights-list">
+                    <li>Right to a clear, itemized bill. No "Misc" charges.</li>
+                    <li>Right to check if package rates include OT/Nursing.</li>
+                    <li>Right to ask for price justification vs NPPA caps.</li>
+                    <li>Right to view medical records and detailed consumption logs.</li>
+                </ul>
+            </section>
+        </aside>
+
+    </div>
+
+    <!-- AI Email Modal -->
+    <div class="modal-overlay" id="email-modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg" id="modal-title">✨ AI Insights</h3>
+                <button onclick="closeModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div id="email-content-area">
+                <textarea id="generated-email" rows="12" class="w-full p-2 border rounded" style="font-family: monospace; font-size: 0.9rem;"></textarea>
+            </div>
+            <div class="mt-4 flex gap-2">
+                <button class="btn btn-primary" onclick="copyEmail()">Copy Text</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast">
+        <span>✅ Analysis complete. Review below.</span>
+    </div>
+
+    <script>
+        // --- 0. CONFIG ---
+        const apiKey = "AIzaSyDMd0MrtZvUWlykqh4LJYAHjMoZOTZs-k4"; // Injected by runtime
+
+        // --- 1. DATASETS ---
+        
+        // Massive NPPA Price Cap Dataset 
+        // Expanded to 100+ items covering critical hospital categories
+        const NPPA_CAPS = [
+            // --- Common Antibiotics (Tablets/Capsules/Injections) ---
+            { keyword: "Amoxicillin", maxPerUnit: 7.21 }, // 500mg
+            { keyword: "Amoxicillin Clavulanate", maxPerUnit: 22.50 }, // 625mg
+            { keyword: "Azithromycin 500", maxPerUnit: 23.44 }, 
+            { keyword: "Azithromycin 250", maxPerUnit: 11.50 },
+            { keyword: "Cefixime 200", maxPerUnit: 18.20 }, 
+            { keyword: "Ceftriaxone 1g", maxPerUnit: 61.30 }, // Injection
+            { keyword: "Ceftriaxone 500", maxPerUnit: 35.00 },
+            { keyword: "Meropenem 1g", maxPerUnit: 950.00 }, // High cost antibiotic
+            { keyword: "Meropenem 500", maxPerUnit: 480.00 },
+            { keyword: "Piperacillin Tazobactam", maxPerUnit: 420.00 }, 
+            { keyword: "Vancomycin 500", maxPerUnit: 280.00 }, 
+            { keyword: "Vancomycin 1g", maxPerUnit: 500.00 },
+            { keyword: "Ciprofloxacin 500", maxPerUnit: 3.50 }, 
+            { keyword: "Levofloxacin 500", maxPerUnit: 8.50 },
+            { keyword: "Doxycycline", maxPerUnit: 3.00 },
+
+            // --- Pain & Inflammation (Analgesics) ---
+            { keyword: "Paracetamol 500", maxPerUnit: 2.80 }, 
+            { keyword: "Paracetamol 650", maxPerUnit: 3.50 },
+            { keyword: "Paracetamol Infusion", maxPerUnit: 25.00 }, // 100ml IV
+            { keyword: "Diclofenac Injection", maxPerUnit: 12.00 }, 
+            { keyword: "Diclofenac Tablet", maxPerUnit: 4.10 },
+            { keyword: "Tramadol Injection", maxPerUnit: 15.00 }, 
+            { keyword: "Tramadol Tablet", maxPerUnit: 6.50 },
+            { keyword: "Ibuprofen 400", maxPerUnit: 1.50 },
+            { keyword: "Aceclofenac", maxPerUnit: 5.00 },
+
+            // --- Gastrointestinal ---
+            { keyword: "Pantoprazole 40", maxPerUnit: 9.30 }, 
+            { keyword: "Pantoprazole Injection", maxPerUnit: 45.00 },
+            { keyword: "Omeprazole 20", maxPerUnit: 4.50 }, 
+            { keyword: "Rabeprazole 20", maxPerUnit: 8.00 },
+            { keyword: "Ranitidine Injection", maxPerUnit: 6.00 }, 
+            { keyword: "Ondansetron Injection", maxPerUnit: 14.00 }, 
+            { keyword: "Ondansetron 4", maxPerUnit: 5.00 },
+
+            // --- Cardiovascular / BP / Cholesterol ---
+            { keyword: "Atorvastatin 10", maxPerUnit: 11.20 }, 
+            { keyword: "Atorvastatin 20", maxPerUnit: 21.00 },
+            { keyword: "Rosuvastatin 10", maxPerUnit: 15.50 }, 
+            { keyword: "Metoprolol 50", maxPerUnit: 6.50 }, 
+            { keyword: "Telmisartan 40", maxPerUnit: 7.80 }, 
+            { keyword: "Amlodipine 5", maxPerUnit: 5.20 }, 
+            { keyword: "Clopidogrel 75", maxPerUnit: 13.00 }, 
+            { keyword: "Heparin 5000", maxPerUnit: 140.00 }, 
+            { keyword: "Enoxaparin 40", maxPerUnit: 450.00 }, 
+            { keyword: "Enoxaparin 60", maxPerUnit: 650.00 },
+            { keyword: "Aspirin 75", maxPerUnit: 0.50 },
+
+            // --- Diabetes ---
+            { keyword: "Metformin 500", maxPerUnit: 3.20 }, 
+            { keyword: "Metformin 1000", maxPerUnit: 5.50 },
+            { keyword: "Glimepiride 2", maxPerUnit: 5.50 }, 
+            { keyword: "Insulin Human", maxPerUnit: 405.00 }, // vial
+            { keyword: "Insulin Glargine", maxPerUnit: 950.00 }, 
+            { keyword: "Insulin Aspart", maxPerUnit: 1200.00 },
+
+            // --- Respiratory ---
+            { keyword: "Salbutamol", maxPerUnit: 1.80 }, 
+            { keyword: "Budecort Respules", maxPerUnit: 25.00 }, 
+            { keyword: "Duolin Respules", maxPerUnit: 20.00 },
+            { keyword: "Montelukast 10", maxPerUnit: 14.00 }, 
+
+            // --- Oncology (Cancer Drugs - High Priority) ---
+            { keyword: "Trastuzumab 440", maxPerUnit: 55000.00 },
+            { keyword: "Bevacizumab 100", maxPerUnit: 28000.00 },
+            { keyword: "Rituximab 500", maxPerUnit: 35000.00 },
+            { keyword: "Imatinib 400", maxPerUnit: 200.00 }, // Per tab
+            { keyword: "Cisplatin 50", maxPerUnit: 400.00 },
+            { keyword: "Carboplatin 450", maxPerUnit: 2500.00 },
+            { keyword: "Paclitaxel 100", maxPerUnit: 3000.00 },
+
+            // --- Critical Care / High Value ---
+            { keyword: "Albumin 20%", maxPerUnit: 3800.00 }, 
+            { keyword: "Immunoglobulin 5g", maxPerUnit: 15000.00 }, 
+            { keyword: "Propofol 10ml", maxPerUnit: 220.00 }, 
+            { keyword: "Midazolam", maxPerUnit: 25.00 }, 
+            { keyword: "Noradrenaline", maxPerUnit: 80.00 },
+            { keyword: "Adrenaline", maxPerUnit: 15.00 },
+
+            // --- IV Fluids ---
+            { keyword: "Sodium Chloride 500", maxPerUnit: 38.00 }, // NS
+            { keyword: "Normal Saline 500", maxPerUnit: 38.00 }, 
+            { keyword: "Dextrose 5% 500", maxPerUnit: 28.00 }, 
+            { keyword: "Ringer Lactate 500", maxPerUnit: 45.00 }, 
+            { keyword: "Mannitol 100", maxPerUnit: 90.00 }, 
+            { keyword: "DNS 500", maxPerUnit: 40.00 },
+
+            // --- Medical Devices / Implants (Strict Caps) ---
+            { keyword: "Bare Metal Stent", maxPerUnit: 8261.00 },
+            { keyword: "Drug Eluting Stent", maxPerUnit: 31600.00 }, 
+            { keyword: "Knee Implant", maxPerUnit: 54720.00 }, 
+            { keyword: "Hip Implant", maxPerUnit: 45000.00 },
+            { keyword: "Intraocular Lens", maxPerUnit: 9000.00 }, // Cataract
+
+            // --- Consumables (Frequent Overcharge Targets) ---
+            { keyword: "Sterile Gloves", maxPerUnit: 15.00 }, // Pair
+            { keyword: "Examination Gloves", maxPerUnit: 5.00 },
+            { keyword: "N95 Mask", maxPerUnit: 45.00 },
+            { keyword: "Surgical Mask", maxPerUnit: 10.00 },
+            { keyword: "PPE Kit", maxPerUnit: 550.00 },
+            { keyword: "Three Way Stop Cock", maxPerUnit: 20.00 },
+            { keyword: "IV Set", maxPerUnit: 30.00 },
+            { keyword: "IV Cannula", maxPerUnit: 105.00 }, 
+            { keyword: "Syringe 2ml", maxPerUnit: 5.00 },
+            { keyword: "Syringe 5ml", maxPerUnit: 8.00 },
+            { keyword: "Syringe 10ml", maxPerUnit: 12.00 },
+            { keyword: "Syringe 50ml", maxPerUnit: 60.00 },
+            { keyword: "Foley Catheter", maxPerUnit: 220.00 },
+            { keyword: "Urine Bag", maxPerUnit: 100.00 },
+            { keyword: "Ryles Tube", maxPerUnit: 150.00 },
+            { keyword: "Suction Catheter", maxPerUnit: 40.00 },
+
+            // --- Diagnostics (Indicative / CGHS Rates) ---
+            { keyword: "X-Ray Chest", maxPerUnit: 400.00 },
+            { keyword: "CT Scan Head", maxPerUnit: 2500.00 }, 
+            { keyword: "CT Scan Abdomen", maxPerUnit: 4500.00 },
+            { keyword: "MRI Brain", maxPerUnit: 5500.00 },
+            { keyword: "MRI Spine", maxPerUnit: 6000.00 },
+            { keyword: "CBC", maxPerUnit: 300.00 },
+            { keyword: "Hemogram", maxPerUnit: 300.00 },
+            { keyword: "USG Abdomen", maxPerUnit: 850.00 },
+            { keyword: "Liver Function Test", maxPerUnit: 600.00 },
+            { keyword: "Kidney Function Test", maxPerUnit: 700.00 },
+            { keyword: "Lipid Profile", maxPerUnit: 700.00 },
+            { keyword: "Thyroid Profile", maxPerUnit: 500.00 },
+            { keyword: "CRP", maxPerUnit: 400.00 },
+            { keyword: "D-Dimer", maxPerUnit: 1000.00 },
+            { keyword: "Ferritin", maxPerUnit: 800.00 },
+
+            // --- Hospital Charges ---
+            { keyword: "ICU Bed", maxPerUnit: 7000.00 }, 
+            { keyword: "General Ward", maxPerUnit: 2000.00 },
+            { keyword: "Private Room", maxPerUnit: 5000.00 },
+            { keyword: "Nursing Charge", maxPerUnit: 600.00 },
+            { keyword: "Oxygen Charge", maxPerUnit: 50.00 }, 
+            { keyword: "Doctor Visit", maxPerUnit: 1500.00 }, // General consult cap
+            { keyword: "Diet Charges", maxPerUnit: 500.00 }
+        ];
+
+        // Vague Terms
+        const VAGUE_TERMS = ["misc", "service charge", "handling", "admin fee", "sundry", "kit", "consumables", "file charges", "RMO charges", "documentation fee", "sanitization charge", "bio waste", "processing fee"];
+
+        // Double Billing Logic Keywords
+        const PACKAGE_KEYWORDS = ["package", "surgery", "implant procedure", "cabg", "delivery"];
+        const EXCLUDED_IN_PACKAGE = ["ot charges", "operation theatre", "monitor", "pulse oximeter", "nursing", "anesthesia charges", "surgeon fee", "assistant surgeon"];
+
+        let analysisResults = null;
+
+        // --- 2. GEMINI API HELPER ---
+        async function callGemini(prompt, imageBase64 = null) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const parts = [{ text: prompt }];
+            if (imageBase64) {
+                // Remove data URL prefix if present
+                const base64Data = imageBase64.split(',')[1];
+                parts.push({
+                    inlineData: {
+                        mimeType: "image/jpeg",
+                        data: base64Data
+                    }
+                });
+            }
+
+            const payload = { contents: [{ parts: parts }] };
+
+            // Retry logic
+            const delays = [1000, 2000, 4000];
+            for (let i = 0; i <= delays.length; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                } catch (err) {
+                    if (i === delays.length) throw err;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        }
+
+        // --- 3. UI HELPERS ---
+
+        function switchTab(mode) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const clickedBtn = event.target;
+            clickedBtn.classList.add('active');
+            
+            if(mode === 'manual') {
+                document.getElementById('manual-entry').classList.remove('hidden');
+                document.getElementById('file-upload').classList.add('hidden');
+            } else {
+                document.getElementById('manual-entry').classList.add('hidden');
+                document.getElementById('file-upload').classList.remove('hidden');
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `<span>✅ ${msg}</span>`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // --- 4. TABLE LOGIC ---
+
+        function clearTable() {
+            document.querySelector('#bill-table tbody').innerHTML = '';
+        }
+
+        function addItemRow(data = {}) {
+            const tbody = document.querySelector('#bill-table tbody');
+            const tr = document.createElement('tr');
+            
+            // Defaults
+            const name = data.name || '';
+            const cat = data.cat || 'Medicine';
+            const qty = data.qty || 1;
+            const price = data.price || 0;
+            const total = qty * price;
+
+            tr.innerHTML = `
+                <td><input type="text" placeholder="e.g. Paracetamol" class="item-name" value="${name}"></td>
+                <td>
+                    <select class="item-cat">
+                        <option value="Medicine" ${cat==='Medicine'?'selected':''}>Medicine</option>
+                        <option value="Procedure" ${cat==='Procedure'?'selected':''}>Procedure</option>
+                        <option value="Bed" ${cat==='Bed'?'selected':''}>Bed/Room</option>
+                        <option value="Lab" ${cat==='Lab'?'selected':''}>Lab Test</option>
+                        <option value="Consumables" ${cat==='Consumables'?'selected':''}>Consumables</option>
+                        <option value="Misc" ${cat==='Misc'?'selected':''}>Misc</option>
+                    </select>
+                </td>
+                <td><input type="number" class="item-qty" value="${qty}" min="1" onchange="calcRow(this)"></td>
+                <td><input type="number" class="item-price" value="${price}" min="0" onchange="calcRow(this)"></td>
+                <td><input type="number" class="item-total" value="${total}" readonly></td>
+                <td><button class="btn-delete" onclick="deleteRow(this)">×</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        function deleteRow(btn) {
+            btn.closest('tr').remove();
+        }
+
+        function calcRow(input) {
+            const tr = input.closest('tr');
+            const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
+            const price = parseFloat(tr.querySelector('.item-price').value) || 0;
+            tr.querySelector('.item-total').value = (qty * price).toFixed(2);
+        }
+
+        // Initialize with default data
+        window.onload = function() {
+            addItemRow({name: 'Paracetamol 500mg', cat: 'Medicine', qty: 10, price: 50});
+            addItemRow({name: 'Misc Handling Charges', cat: 'Misc', qty: 1, price: 500});
+        };
+
+        // --- 5. VISION & AI SCANNING ---
+
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            document.getElementById('fileName').innerText = file.name;
+            document.getElementById('upload-loading').classList.remove('hidden');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                scanBillWithAI(base64);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function scanBillWithAI(base64) {
+            const prompt = `
+                Analyze this hospital bill image. Extract all line items.
+                Return ONLY a valid JSON array of objects.
+                Each object must have these keys:
+                - "name" (string, item description)
+                - "cat" (string, guess best category from: Medicine, Procedure, Bed, Lab, Consumables, Misc)
+                - "qty" (number, default 1)
+                - "price" (number, unit price. If only total is visible, divide by qty)
+                
+                Do not include markdown code blocks. Just the raw JSON string.
+            `;
+
+            try {
+                const result = await callGemini(prompt, base64);
+                let cleanResult = result.replace(/```json/g, '').replace(/```/g, '').trim();
+                const items = JSON.parse(cleanResult);
+
+                if (Array.isArray(items)) {
+                    clearTable();
+                    items.forEach(item => addItemRow(item));
+                    
+                    // Switch back to manual tab to show results
+                    document.getElementById('upload-loading').classList.add('hidden');
+                    document.querySelector('.tab-btn:first-child').click(); // Switch tab
+                    showToast(`AI Scanned ${items.length} items successfully!`);
+                } else {
+                    throw new Error("Invalid JSON structure");
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('upload-loading').classList.add('hidden');
+                alert("Could not scan bill. Please try a clearer image or enter manually.");
+            }
+        }
+
+        // --- 6. ANALYSIS CORE LOGIC ---
+
+        function getBillData() {
+            const rows = document.querySelectorAll('#bill-table tbody tr');
+            const data = [];
+            rows.forEach(tr => {
+                data.push({
+                    name: tr.querySelector('.item-name').value,
+                    category: tr.querySelector('.item-cat').value,
+                    qty: parseFloat(tr.querySelector('.item-qty').value) || 0,
+                    unitPrice: parseFloat(tr.querySelector('.item-price').value) || 0,
+                    total: parseFloat(tr.querySelector('.item-total').value) || 0
+                });
+            });
+            return data;
+        }
+
+        function startAnalysis() {
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('results-details').classList.add('hidden');
+            document.getElementById('summary-card').classList.add('hidden');
+            
+            setTimeout(() => {
+                const items = getBillData();
+                runRuleBasedLogic(items);
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('results-details').classList.remove('hidden');
+                document.getElementById('summary-card').classList.remove('hidden');
+                showToast("Analysis complete");
+                if(window.innerWidth < 900) {
+                     document.getElementById('summary-card').scrollIntoView({behavior: 'smooth'});
+                }
+            }, 800);
+        }
+
+        function runRuleBasedLogic(items) {
+            let issues = [];
+            let originalTotal = 0;
+            let recommendedTotal = 0;
+            let score = 100;
+
+            const hasPackage = items.some(i => PACKAGE_KEYWORDS.some(k => i.name.toLowerCase().includes(k)));
+
+            items.forEach(item => {
+                originalTotal += item.total;
+                let itemRecTotal = item.total;
+                let flagged = false;
+
+                const nameLower = item.name.toLowerCase();
+
+                // Rule 1: Illegal Markup (NPPA)
+                // IMPROVED LOGIC: Find ALL matches, then pick the LONGEST keyword match.
+                // This prevents "Paracetamol 1000mg" from matching just "Paracetamol" (and using the cheap price).
+                const allMatches = NPPA_CAPS.filter(cap => nameLower.includes(cap.keyword.toLowerCase()));
+                
+                // Sort matches by length (descending) -> Most specific match first
+                allMatches.sort((a, b) => b.keyword.length - a.keyword.length);
+                
+                const nppaMatch = allMatches.length > 0 ? allMatches[0] : null;
+
+                if (nppaMatch) {
+                    const pricePerUnit = item.unitPrice;
+                    const limit = nppaMatch.maxPerUnit * 1.10; // 10% tolerance
+                    if (pricePerUnit > limit) {
+                        flagged = true;
+                        score -= 10;
+                        const correctTotal = item.qty * nppaMatch.maxPerUnit;
+                        itemRecTotal = correctTotal;
+                        issues.push({
+                            item: item,
+                            type: 'illegal',
+                            title: 'Illegal Markup',
+                            desc: `Price ₹${pricePerUnit} exceeds NPPA cap of ₹${nppaMatch.maxPerUnit} for '${nppaMatch.keyword}'`,
+                            recAmount: correctTotal
+                        });
+                    }
+                }
+
+                // Rule 2: Opaque Charges
+                if (!flagged) {
+                    const isVague = VAGUE_TERMS.some(term => nameLower.includes(term));
+                    if (isVague) {
+                        flagged = true;
+                        score -= 5;
+                        issues.push({
+                            item: item,
+                            type: 'opaque',
+                            title: 'Opaque Charge',
+                            desc: `Vague description. Request itemized breakup.`,
+                            recAmount: item.total 
+                        });
+                    }
+                }
+
+                // Rule 3: Double Billing
+                if (!flagged && hasPackage) {
+                    const isExcluded = EXCLUDED_IN_PACKAGE.some(term => nameLower.includes(term));
+                    if (isExcluded) {
+                        flagged = true;
+                        score -= 15;
+                        itemRecTotal = 0; 
+                        issues.push({
+                            item: item,
+                            type: 'double',
+                            title: 'Possible Double Billing',
+                            desc: `Charges likely included in Surgery/Package cost.`,
+                            recAmount: 0
+                        });
+                    }
+                }
+
+                recommendedTotal += (flagged && issues[issues.length-1].recAmount !== undefined) 
+                    ? issues[issues.length-1].recAmount 
+                    : item.total;
+            });
+
+            score = Math.max(0, Math.min(100, score));
+
+            analysisResults = {
+                items,
+                issues,
+                originalTotal,
+                recommendedTotal,
+                score
+            };
+
+            renderResultsUI();
+        }
+
+        function renderResultsUI() {
+            const r = analysisResults;
+            
+            document.getElementById('original-total').innerText = `₹${r.originalTotal.toFixed(2)}`;
+            document.getElementById('corrected-total').innerText = `₹${r.recommendedTotal.toFixed(2)}`;
+            document.getElementById('savings-total').innerText = `₹${(r.originalTotal - r.recommendedTotal).toFixed(2)}`;
+            
+            const scoreEl = document.getElementById('transparency-score');
+            scoreEl.innerText = r.score;
+            scoreEl.className = 'score-circle'; // reset
+            
+            let verdict = "Clean Bill";
+            if (r.score > 80) { scoreEl.classList.add('good'); verdict = "Bill looks Good"; }
+            else if (r.score > 60) { scoreEl.classList.add('medium'); verdict = "Some Issues Found"; }
+            else { scoreEl.classList.add('bad'); verdict = "High Overcharging Risk"; }
+            
+            document.getElementById('verdict-text').innerText = verdict;
+            renderIssuesList('all');
+        }
+
+        function renderIssuesList(filter) {
+            const container = document.getElementById('issues-container');
+            container.innerHTML = '';
+
+            const filtered = filter === 'all' 
+                ? analysisResults.issues 
+                : analysisResults.issues.filter(i => i.type === filter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<p class="text-center text-light">No issues found in this category.</p>`;
+                return;
+            }
+
+            filtered.forEach(issue => {
+                const diff = issue.item.total - issue.recAmount;
+                const savingsText = diff > 0 ? `Potential Savings: ₹${diff.toFixed(2)}` : 'Review Required';
+                
+                const html = `
+                    <div class="issue-item type-${issue.type}">
+                        <div class="flex justify-between">
+                            <h4 class="font-bold">${issue.item.name}</h4>
+                            <span class="font-bold text-danger">₹${issue.item.total}</span>
+                        </div>
+                        <span class="badge ${issue.type === 'illegal' ? 'bg-red-100' : issue.type === 'opaque' ? 'bg-yellow-100' : 'bg-blue-100'}">
+                            ${issue.title}
+                        </span>
+                        <p class="text-sm text-light mt-1">${issue.desc}</p>
+                        <div class="mt-2 text-sm font-medium text-success">
+                            Recommended: ₹${issue.recAmount.toFixed(2)} (${savingsText})
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function filterIssues(type) {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            renderIssuesList(type);
+        }
+
+        // --- 7. AI FEATURES (Draft, Simplifier, Insurance) ---
+        
+        async function draftDisputeEmail() {
+            if(!analysisResults || analysisResults.issues.length === 0) {
+                alert("No issues found to dispute!");
+                return;
+            }
+            openModal("✨ Drafting Dispute Email...");
+
+            const issuesSummary = analysisResults.issues.map(i => 
+                `- ${i.item.name}: Charged ₹${i.item.total}. Reason: ${i.desc}`
+            ).join('\n');
+            const savings = (analysisResults.originalTotal - analysisResults.recommendedTotal).toFixed(2);
+
+            const prompt = `
+                Act as a patient rights advocate in India.
+                Write a formal email to the Hospital Administrator disputing:
+                ${issuesSummary}
+                Total disputed: ₹${savings}.
+                Cite "Right to Transparency" and relevant NPPA guidelines.
+                Demand refund or written justification in 7 days.
+                Use placeholders [Your Name], [Bill Number], [Date].
+                Plain text only.
+            `;
+            generateAIContent(prompt);
+        }
+
+        async function simplifyBill() {
+            if(!analysisResults) { alert("Please analyze a bill first."); return; }
+            openModal("✨ Decoding Medical Jargon...");
+
+            const itemList = analysisResults.items.map(i => i.name).join(", ");
+            const prompt = `
+                You are a helpful doctor explaining a bill to a patient.
+                Here are the items: ${itemList}.
+                
+                Create a simple "Patient-Friendly Summary".
+                - Group items logically (e.g., "Medicines for Infection", "Room Charges").
+                - Explain complex terms (e.g., "Piperacillin" -> "Strong antibiotic for severe infections").
+                - Use clear, reassuring language. 
+                - Format as a clear list using bullet points.
+                - No markdown, just plain text with simple formatting.
+            `;
+            generateAIContent(prompt);
+        }
+
+        async function checkInsurance() {
+            if(!analysisResults) { alert("Please analyze a bill first."); return; }
+            openModal("✨ Checking Insurance Admissibility...");
+
+            const itemList = analysisResults.items.map(i => `${i.name} (Cat: ${i.category})`).join(", ");
+            const prompt = `
+                You are an expert Health Insurance TPA (Third Party Administrator) in India.
+                Review these bill items: ${itemList}.
+                
+                Identify items that are typically "Non-Payable" (excluded) by standard Indian health insurance policies (IRDAI List of Non-Payables).
+                Examples: Registration fees, Diapers, Gloves (sometimes), Diet charges, Admission kits.
+                
+                Output:
+                1. List of Likely Non-Payable Items with reasons.
+                2. Estimated Out-of-Pocket cost for the patient.
+                3. Advice on how to minimize these deductions.
+                
+                Keep it strict but helpful. Plain text only.
+            `;
+            generateAIContent(prompt);
+        }
+
+        async function generateAIContent(prompt) {
+            try {
+                const text = await callGemini(prompt);
+                document.getElementById('generated-email').value = text;
+            } catch(e) {
+                document.getElementById('generated-email').value = "Error generating content. Please check connection.";
+                console.error(e);
+            }
+        }
+
+        // --- 8. UI UTILS ---
+
+        function openModal(title) {
+            document.getElementById('email-modal').classList.add('open');
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('generated-email').value = "Thinking... Please wait...";
+        }
+
+        function closeModal() {
+            document.getElementById('email-modal').classList.remove('open');
+        }
+
+        function copyEmail() {
+            const copyText = document.getElementById("generated-email");
+            copyText.select();
+            document.execCommand("copy");
+            showToast("Content copied to clipboard!");
+        }
+
+        // --- 9. REPORT ---
+        function downloadReport() {
+            if (!analysisResults) return;
+            const r = analysisResults;
+            const savings = (r.originalTotal - r.recommendedTotal).toFixed(2);
+            
+            const printContent = `
+                <html>
+                <head>
+                    <title>LifeCord AI Report</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 40px; color: #333; }
+                        h1 { color: #3A7BFF; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+                        .summary { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }
+                        th { background: #f1f5f9; }
+                        .flag { color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; }
+                        .red { background: #ef4444; }
+                        .orange { background: #f97316; }
+                        .blue { background: #3b82f6; }
+                        .footer { margin-top: 50px; font-size: 0.8rem; color: #888; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <h1>LifeCord Bill Analysis Report</h1>
+                    <div class="summary">
+                        <h2>Summary</h2>
+                        <p><strong>Transparency Score:</strong> ${r.score}/100</p>
+                        <p><strong>Original Bill Amount:</strong> ₹${r.originalTotal.toFixed(2)}</p>
+                        <p><strong>Fair/Recommended Amount:</strong> ₹${r.recommendedTotal.toFixed(2)}</p>
+                        <p style="font-size: 1.2rem; color: #10b981; font-weight: bold;">Est. Savings: ₹${savings}</p>
+                    </div>
+                    <h2>Itemized Audit</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Charged</th>
+                                <th>Fair Price</th>
+                                <th>Issue Found</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${r.items.map(item => {
+                                const issue = r.issues.find(i => i.item === item);
+                                let badge = '';
+                                let recPrice = item.total;
+                                if (issue) {
+                                    recPrice = issue.recAmount;
+                                    const color = issue.type === 'illegal' ? 'red' : issue.type === 'opaque' ? 'orange' : 'blue';
+                                    badge = `<span class="flag ${color}">${issue.title}</span>`;
+                                }
+                                return `<tr><td>${item.name}</td><td>₹${item.total}</td><td>₹${recPrice.toFixed(2)}</td><td>${badge}</td></tr>`;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <div class="footer"><p>Generated by LifeCord AI Patient Advocate.</p></div>
+                </body>
+                </html>
+            `;
+            const win = window.open('', '_blank');
+            win.document.write(printContent);
+            win.document.close();
+        }
+
+    </script>
+</body>
+</html>

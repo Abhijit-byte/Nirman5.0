@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LifeCord | Health Financing &amp; EMI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-color: #F97316;   /* orange */
+      --primary-dark: #C05611;
+      --primary-light: #FFEDD5;
+      --bg-color: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+
+      --radius-card: 20px;
+      --radius-btn: 14px;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.03);
+      --shadow-float: 0 10px 25px -5px rgba(249, 115, 22, 0.25);
+      --nav-height: 70px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: calc(var(--nav-height) + 20px);
+    }
+
+    /* Header (same layout as base, orange accent) */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+    .location-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      background: var(--bg-color);
+      padding: 8px 12px;
+      border-radius: 50px;
+      cursor: pointer;
+    }
+    .location-pill svg { color: var(--primary-color); }
+
+    .user-actions { display: flex; gap: 12px; }
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--bg-color);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      position: relative;
+      cursor: pointer;
+    }
+    .badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 1px solid white;
+    }
+    .profile-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .main-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 20px 28px;
+    }
+
+    @media (min-width: 900px) {
+      .main-container { max-width: 1040px; padding: 32px 40px 40px; }
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    @media (min-width: 900px) {
+      .page-title {
+        font-size: 22px;
+        margin-top: 4px;
+      }
+    }
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    @media (min-width: 900px) {
+      .page-subtitle {
+        font-size: 16px;
+        margin-bottom: 24px;
+      }
+    }
+
+    /* Desktop side-by-side container for hero + how it works */
+    @media (min-width: 900px) {
+      .finance-layout-desktop {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+        gap: 32px;
+        align-items: start;
+        margin-bottom: 24px;
+      }
+      .finance-hero {
+        margin-bottom: 0;
+        min-height: 280px;
+      }
+      .lc-card#howSection {
+        margin-bottom: 0;
+        padding: 20px 18px 22px;
+        min-height: 280px;
+      }
+    }
+
+    /* Hero: single card, more breathing room */
+    .finance-hero {
+      background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
+      border-radius: var(--radius-card);
+      padding: 20px 18px 18px;
+      color: white;
+      box-shadow: var(--shadow-float);
+      margin-bottom: 24px;
+    }
+    .finance-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.12);
+      font-size: 11px;
+      font-weight: 500;
+      margin-bottom: 10px;
+    }
+    .finance-hero h1 {
+      font-size: 19px;
+      margin-bottom: 6px;
+    }
+    .finance-hero p {
+      font-size: 12px;
+      opacity: 0.96;
+      margin-bottom: 12px;
+      max-width: 48ch;
+    }
+    .finance-hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: var(--radius-btn);
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #FFFFFF;
+      color: var(--primary-dark);
+    }
+    .btn-outline-light {
+      background: transparent;
+      color: #FFFFFF;
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+
+    .finance-highlights {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    @media (min-width: 600px) {
+      .finance-highlights {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .highlight-pill {
+      background: rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 11px;
+    }
+    .highlight-pill span {
+      font-weight: 600;
+    }
+
+    /* Generic LifeCord card with relaxed spacing */
+    .lc-card {
+      background: var(--card-bg);
+      border-radius: var(--radius-card);
+      padding: 16px 14px 18px;
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 20px;
+    }
+    .lc-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .lc-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    /* How it works: 2-column on desktop, 1 on mobile */
+    .how-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    @media (min-width: 700px) {
+      .how-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .how-step {
+      background: #FFF7ED;
+      border-radius: 14px;
+      padding: 10px 12px;
+      border-left: 3px solid var(--primary-color);
+    }
+    .how-step h4 {
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+    .how-step p {
+      font-size: 11px;
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    /* EMI layout: stacked on mobile, split on desktop */
+    .emi-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px;
+    }
+    @media (min-width: 900px) {
+      .emi-layout {
+        flex-direction: row;
+        align-items: flex-start;
+      }
+    }
+
+    .emi-calc {
+      flex: 1;
+      background: #FFFBEB;
+      border-radius: 16px;
+      padding: 14px;
+      border: 1px solid #FED7AA;
+    }
+    .emi-calc label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .emi-calc input,
+    .emi-calc select {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid #FED7AA;
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-family: inherit;
+      background: #FFFFFF;
+    }
+    .emi-row {
+      display: flex;
+      gap: 8px;
+    }
+    .emi-row > div { flex: 1; }
+
+    .emi-result {
+      background: white;
+      border-radius: 12px;
+      padding: 10px 10px 12px;
+      border: 1px solid #FFE4CC;
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .emi-number {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .emi-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .emi-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .emi-info-card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      padding: 10px 12px;
+      border: 1px solid #E5E7EB;
+      font-size: 12px;
+    }
+    .emi-info-card h4 {
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .emi-info-card ul {
+      padding-left: 16px;
+      color: var(--text-muted);
+      font-size: 11px;
+      margin: 0;
+    }
+
+    .tenure-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .tenure-chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #FED7AA;
+      font-size: 11px;
+      background: #FFF7ED;
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: var(--nav-height);
+      background: white;
+      box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: #94A3B8;
+      text-decoration: none;
+      width: 20%;
+      height: 100%;
+      cursor: pointer;
+    }
+    .nav-item.active { color: var(--primary-color); }
+    .nav-item svg { width: 22px; height: 22px; }
+    .nav-label { font-size: 10px; font-weight: 500; }
+    .nav-fab {
+      width: 50px;
+      height: 50px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 10px 20px rgba(249, 115, 22, 0.45);
+      transform: translateY(-20px);
+      border: 4px solid var(--bg-color);
+    }
+
+    @media (min-width: 900px) {
+      .bottom-nav { display: none; }
+    }
+
+    /* Payment Modes Section */
+    .payment-modes-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (min-width: 600px) {
+      .payment-modes-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (min-width: 900px) {
+      .payment-modes-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .payment-mode-card {
+      background: var(--bg-color);
+      border-radius: var(--radius-base);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border: 1px solid rgba(249, 115, 22, 0.1);
+    }
+    .payment-mode-card svg {
+      margin-bottom: 4px;
+    }
+    .payment-mode-card h4 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0;
+    }
+    .payment-mode-card p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .btn-mode {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .payment-mode-card.saved-methods {
+      grid-column: span 1;
+    }
+    @media (min-width: 600px) {
+      .payment-mode-card.saved-methods {
+        grid-column: span 2;
+      }
+    }
+    @media (min-width: 900px) {
+      .payment-mode-card.saved-methods {
+        grid-column: span 1;
+      }
+    }
+    .saved-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .saved-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+    }
+    .saved-pill {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 10px;
+    }
+    .saved-id {
+      color: var(--text-muted);
+    }
+
+    /* Loan Partners Marketplace */
+    .partners-scroll {
+      display: flex;
+      gap: 14px;
+      overflow-x: auto;
+      padding: 12px 0;
+      margin-top: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .partners-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+    .partners-scroll::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 4px;
+    }
+    .partner-card {
+      min-width: 240px;
+      background: var(--bg-color);
+      border-radius: var(--radius-base);
+      padding: 14px;
+      border: 1px solid rgba(249, 115, 22, 0.15);
+    }
+    .partner-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .partner-logo {
+      width: 40px;
+      height: 40px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--primary-dark);
+      font-size: 14px;
+    }
+    .partner-badge {
+      background: var(--primary-color);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .partner-card h4 {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .partner-details {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .partner-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+    }
+    .detail-label {
+      color: var(--text-muted);
+    }
+    .detail-value {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    /* Hospital Bill Splitter */
+    .splitter-container {
+      margin-top: 12px;
+    }
+    .total-bill-display {
+      background: var(--primary-light);
+      border-radius: var(--radius-base);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .total-bill-display span:first-child {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .bill-amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .split-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .split-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .split-row label {
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+    }
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #CBD5E1;
+      border-radius: 24px;
+      transition: 0.3s;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--primary-color);
+    }
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(20px);
+    }
+    .split-slider {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .split-slider label {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .split-slider label span {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .split-slider input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #E2E8F0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .split-slider input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+    }
+    .split-slider input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      cursor: pointer;
+      border: none;
+    }
+    .split-result {
+      background: var(--bg-color);
+      border-radius: var(--radius-base);
+      padding: 10px 12px;
+      margin-top: 8px;
+    }
+    .split-result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .emi-split-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    .split-suggestions {
+      margin-top: 14px;
+    }
+    .suggestion-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .suggestion-pill {
+      background: var(--bg-color);
+      border: 1px solid rgba(249, 115, 22, 0.2);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .suggestion-pill:hover {
+      background: var(--primary-light);
+      border-color: var(--primary-color);
+    }
+
+    /* Health Wallet */
+    .wallet-balance-card {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #FB923C 100%);
+      border-radius: var(--radius-base);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 12px 0;
+      color: white;
+    }
+    .balance-display {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .balance-label {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+    .balance-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .wallet-balance-card .btn {
+      background: white;
+      color: var(--primary-dark);
+    }
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    @media (min-width: 600px) {
+      .wallet-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .wallet-feature {
+      background: var(--bg-color);
+      border-radius: var(--radius-base);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .wallet-feature h4 {
+      font-size: 12px;
+      margin: 4px 0 0 0;
+    }
+    .wallet-feature p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .wallet-feature.healthcoins {
+      grid-column: span 1;
+    }
+    @media (min-width: 600px) {
+      .wallet-feature.healthcoins {
+        grid-column: span 3;
+      }
+    }
+    .coins-earn {
+      margin-top: 4px;
+      padding: 6px 8px;
+      background: var(--primary-light);
+      border-radius: var(--radius-sm);
+    }
+    .coins-earn small {
+      font-size: 10px;
+      color: var(--primary-dark);
+    }
+
+    /* Insurance Add-ons */
+    .insurance-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .insurance-item {
+      background: var(--bg-color);
+      border-radius: var(--radius-base);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .insurance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex: 1;
+    }
+    .insurance-header h4 {
+      font-size: 12px;
+      margin: 0 0 2px 0;
+    }
+    .insurance-header p {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .insurance-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      white-space: nowrap;
+      margin-right: 8px;
+    }
+    .insurance-total {
+      background: var(--primary-light);
+      border-radius: var(--radius-base);
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .total-premium {
+      font-size: 16px;
+      color: var(--primary-dark);
+    }
+
+    /* Transaction History */
+    .transaction-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--bg-color);
+      border-radius: var(--radius-base);
+      padding: 10px 12px;
+    }
+    .txn-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .txn-icon.paid {
+      background: rgba(33, 128, 141, 0.15);
+      color: var(--primary-color);
+    }
+    .txn-icon.missed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #EF4444;
+    }
+    .txn-icon.refund {
+      background: rgba(34, 197, 94, 0.15);
+      color: #22C55E;
+    }
+    .txn-details {
+      flex: 1;
+    }
+    .txn-details h4 {
+      font-size: 12px;
+      margin: 0 0 2px 0;
+    }
+    .txn-details p {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .txn-amount {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .txn-amount.paid {
+      color: var(--text-main);
+    }
+    .txn-amount.missed {
+      color: #EF4444;
+    }
+    .txn-amount.refund {
+      color: #22C55E;
+    }
+    .txn-download {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Pre-Approved Limit Checker */
+    .limit-checker {
+      margin-top: 12px;
+    }
+    .limit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .limit-result {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--primary-light);
+      border-radius: var(--radius-base);
+    }
+    .limit-display {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: center;
+    }
+    .limit-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .limit-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    /* Quick Actions Row */
+    .quick-actions-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 12px 0;
+      margin-top: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .quick-actions-scroll::-webkit-scrollbar {
+      height: 4px;
+    }
+    .quick-actions-scroll::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 4px;
+    }
+    .quick-action {
+      min-width: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .action-icon {
+      width: 56px;
+      height: 56px;
+      background: var(--primary-light);
+      border-radius: var(--radius-base);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-dark);
+    }
+    .quick-action span {
+      font-size: 10px;
+      text-align: center;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    /* QR Scan to Pay */
+    .qr-pay-container {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .qr-code-display {
+      background: var(--bg-color);
+      border-radius: var(--radius-base);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 2px dashed rgba(249, 115, 22, 0.3);
+    }
+    .qr-features {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 12px;
+      width: 100%;
+    }
+    .qr-feature-item {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="location-pill" id="locationBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+        <circle cx="12" cy="10" r="3"></circle>
+      </svg>
+      <span id="locationText">Locating...</span>
+    </div>
+
+    <div class="user-actions">
+      <button class="icon-btn" aria-label="Notifications">
+        <div class="badge"></div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+      </button>
+      <img src="https://ui-avatars.com/api/?name=LifeCord&background=F97316&color=fff" alt="Profile" class="profile-img" />
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="page-title">LifeCord Health Financing</div>
+    <div class="page-subtitle">Instant hospital payouts, EMIs and optional insurance add-ons.</div>
+
+    <div class="finance-layout-desktop">
+      <!-- Hero -->
+      <section class="finance-hero">
+        <div class="finance-pill">
+          <span>For Hospitals</span> • <span>For Patients</span>
+        </div>
+        <h1>Affordable healthcare financing made simple</h1>
+        <p>LifeCord pays hospitals upfront while patients repay in easy EMIs with transparent fees and cover options.</p>
+
+        <div class="finance-hero-actions">
+          <a href="#emiSection" class="btn btn-primary">Apply for EMI</a>
+          <a href="#howSection" class="btn btn-outline-light">See how it works</a>
+        </div>
+
+        <div class="finance-highlights">
+          <div class="highlight-pill"><span>Instant payouts</span> • Same-day settlement to hospitals</div>
+          <div class="highlight-pill"><span>Flexible EMIs</span> • 3–24 months, clear terms</div>
+          <div class="highlight-pill"><span>Insurance add-ons</span> • Optional health &amp; surgery cover</div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="lc-card" id="howSection">
+        <h3>How it works</h3>
+        <p>Simple four-step flow for patients and hospitals.</p>
+
+        <div class="how-grid">
+          <div class="how-step">
+            <h4>1. Patient selects treatment</h4>
+            <p>Choose hospital and procedure, view indicative cost.</p>
+          </div>
+          <div class="how-step">
+            <h4>2. LifeCord settles hospital</h4>
+            <p>LifeCord disburses 100% treatment amount instantly.</p>
+          </div>
+          <div class="how-step">
+            <h4>3. Patient repays in EMIs</h4>
+            <p>Pick tenure and repayment mode: auto-debit or manual.</p>
+          </div>
+          <div class="how-step">
+            <h4>4. Optional insurance cover</h4>
+            <p>Add covers for claims and cashless care.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- EMI calculator -->
+    <section class="lc-card" id="emiSection">
+      <h3>EMI calculator</h3>
+      <p>Estimate monthly EMIs and check quick eligibility.</p>
+
+      <div class="emi-layout">
+        <!-- Calculator -->
+        <div class="emi-calc" aria-label="EMI Calculator">
+          <label for="amount">Treatment amount (₹)</label>
+          <input id="amount" type="number" min="1000" step="100" value="50000" />
+
+          <div class="emi-row">
+            <div>
+              <label for="tenure">Tenure (months)</label>
+              <select id="tenure">
+                <option value="3">3</option>
+                <option value="6">6</option>
+                <option value="9">9</option>
+                <option value="12" selected>12</option>
+                <option value="18">18</option>
+                <option value="24">24</option>
+              </select>
+            </div>
+            <div>
+              <label for="interest">Interest (% p.a.)</label>
+              <select id="interest">
+                <option value="0">0</option>
+                <option value="6">6</option>
+                <option value="9" selected>9</option>
+                <option value="12">12</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="emi-result" id="resultBox">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="font-size:11px; color:var(--text-muted);">Estimated monthly EMI</div>
+                <div class="emi-number" id="emiValue">₹ 0</div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:11px; color:var(--text-muted);">Total payable</div>
+                <div id="totalPay" style="font-weight:600; color:var(--text-main);">₹ 0</div>
+              </div>
+            </div>
+
+            <div style="margin-top:6px; font-size:11px; color:var(--text-muted);" id="eligibilityText">
+              Eligibility: <strong>Pre-check available</strong>
+            </div>
+
+            <div class="emi-actions">
+              <button class="btn btn-primary" id="checkBtn" type="button">Check eligibility</button>
+              <button class="btn btn-outline-light" id="applyNow" type="button" style="border-color:var(--primary-color); color:var(--primary-color); background:white;">
+                Apply now
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info cards -->
+        <div class="emi-info">
+          <div class="emi-info-card">
+            <h4>EMI for patients</h4>
+            <ul>
+              <li>0% or low-interest options.</li>
+              <li>Minimal KYC with Aadhaar &amp; PAN.</li>
+              <li>Auto-debit and reminders.</li>
+              <li>Track payments in LifeCord.</li>
+            </ul>
+          </div>
+
+          <div class="emi-info-card">
+            <h4>Instant payouts for hospitals</h4>
+            <ul>
+              <li>Same-day settlements.</li>
+              <li>Dashboard and reports.</li>
+              <li>API / QR / portal integration.</li>
+              <li>Higher conversion, fewer no-shows.</li>
+            </ul>
+          </div>
+
+          <div class="emi-info-card">
+            <h4>Popular tenures</h4>
+            <div class="tenure-chips">
+              <div class="tenure-chip">3 months</div>
+              <div class="tenure-chip">6 months</div>
+              <div class="tenure-chip">12 months</div>
+              <div class="tenure-chip">18 months</div>
+              <div class="tenure-chip">24 months</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Payment Modes Section -->
+    <section class="lc-card" id="paymentModesSection">
+      <h3>Payment Modes</h3>
+      <p>Choose how you'd like to repay your EMIs.</p>
+
+      <div class="payment-modes-grid">
+        <div class="payment-mode-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+          <h4>UPI AutoPay</h4>
+          <p>Automatic deduction on due date</p>
+          <button class="btn-mode">Setup</button>
+        </div>
+
+        <div class="payment-mode-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          <h4>Credit/Debit Card</h4>
+          <p>One-time or recurring payment</p>
+          <button class="btn-mode">Add Card</button>
+        </div>
+
+        <div class="payment-mode-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <path d="M3 3h18v18H3z"/>
+            <path d="M12 8v8m-4-4h8"/>
+          </svg>
+          <h4>Netbanking</h4>
+          <p>Secure bank transfer</p>
+          <button class="btn-mode">Pay Now</button>
+        </div>
+
+        <div class="payment-mode-card">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/>
+            <circle cx="18" cy="18" r="3"/>
+          </svg>
+          <h4>Digital Wallet</h4>
+          <p>Paytm, PhonePe, GPay</p>
+          <button class="btn-mode">Link</button>
+        </div>
+
+        <div class="payment-mode-card qr-mode">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <h4>Scan QR Code</h4>
+          <p>Pay via any UPI app</p>
+          <button class="btn-mode">Show QR</button>
+        </div>
+
+        <div class="payment-mode-card saved-methods">
+          <h4>Saved Methods</h4>
+          <div class="saved-list">
+            <div class="saved-item">
+              <span class="saved-pill">UPI</span>
+              <span class="saved-id">user@paytm</span>
+            </div>
+            <div class="saved-item">
+              <span class="saved-pill">Card</span>
+              <span class="saved-id">•••• 4532</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loan Partners Marketplace -->
+    <section class="lc-card" id="loanPartnersSection">
+      <h3>Loan Partners Marketplace</h3>
+      <p>Compare and choose from our verified lending partners.</p>
+
+      <div class="partners-scroll">
+        <div class="partner-card">
+          <div class="partner-header">
+            <div class="partner-logo">HC</div>
+            <div class="partner-badge">Popular</div>
+          </div>
+          <h4>HealthCare Finance</h4>
+          <div class="partner-details">
+            <div class="partner-row">
+              <span class="detail-label">Max Loan</span>
+              <span class="detail-value">₹10L</span>
+            </div>
+            <div class="partner-row">
+              <span class="detail-label">Interest</span>
+              <span class="detail-value">8.9% p.a.</span>
+            </div>
+            <div class="partner-row">
+              <span class="detail-label">Tenure</span>
+              <span class="detail-value">3-36 months</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%; margin-top:8px;">Pre-Approve Now</button>
+        </div>
+
+        <div class="partner-card">
+          <div class="partner-header">
+            <div class="partner-logo">MF</div>
+            <div class="partner-badge">Low Rate</div>
+          </div>
+          <h4>MediFinance Ltd</h4>
+          <div class="partner-details">
+            <div class="partner-row">
+              <span class="detail-label">Max Loan</span>
+              <span class="detail-value">₹5L</span>
+            </div>
+            <div class="partner-row">
+              <span class="detail-label">Interest</span>
+              <span class="detail-value">7.5% p.a.</span>
+            </div>
+            <div class="partner-row">
+              <span class="detail-label">Tenure</span>
+              <span class="detail-value">6-24 months</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%; margin-top:8px;">Pre-Approve Now</button>
+        </div>
+
+        <div class="partner-card">
+          <div class="partner-header">
+            <div class="partner-logo">QL</div>
+            <div class="partner-badge">Fast</div>
+          </div>
+          <h4>QuickLoan Health</h4>
+          <div class="partner-details">
+            <div class="partner-row">
+              <span class="detail-label">Max Loan</span>
+              <span class="detail-value">₹3L</span>
+            </div>
+            <div class="partner-row">
+              <span class="detail-label">Interest</span>
+              <span class="detail-value">10.5% p.a.</span>
+            </div>
+            <div class="partner-row">
+              <span class="detail-label">Tenure</span>
+              <span class="detail-value">3-18 months</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%; margin-top:8px;">Pre-Approve Now</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Hospital Bill Splitter -->
+    <section class="lc-card" id="billSplitterSection">
+      <h3>Hospital Bill Splitter</h3>
+      <p>Split your bill between EMI, insurance, and wallet.</p>
+
+      <div class="splitter-container">
+        <div class="total-bill-display">
+          <span>Total Bill Amount</span>
+          <span class="bill-amount">₹75,000</span>
+        </div>
+
+        <div class="split-controls">
+          <div class="split-row">
+            <label for="insuranceSplit">Insurance Coverage</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="insuranceSplit" checked />
+              <span class="toggle-slider"></span>
+            </div>
+          </div>
+
+          <div class="split-slider">
+            <label>Insurance pays: <span id="insuranceAmount">₹50,000</span></label>
+            <input type="range" id="insuranceRange" min="0" max="75000" step="1000" value="50000" />
+          </div>
+
+          <div class="split-slider">
+            <label>Wallet pays: <span id="walletAmount">₹5,000</span></label>
+            <input type="range" id="walletRange" min="0" max="75000" step="1000" value="5000" />
+          </div>
+
+          <div class="split-result">
+            <div class="split-result-row">
+              <span>EMI Amount</span>
+              <span class="emi-split-value" id="emiSplitAmount">₹20,000</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="split-suggestions">
+          <h4 style="font-size:12px; margin-bottom:6px;">Suggested Splits</h4>
+          <div class="suggestion-pills">
+            <div class="suggestion-pill">50% Insurance + 50% EMI</div>
+            <div class="suggestion-pill">70% Insurance + 30% EMI</div>
+            <div class="suggestion-pill">Insurance + Wallet Only</div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%; margin-top:12px;">Continue to Pay</button>
+      </div>
+    </section>
+
+    <!-- Health Wallet / LifeCord Balance -->
+    <section class="lc-card" id="healthWalletSection">
+      <h3>LifeCord Health Wallet</h3>
+      <p>Your health financing wallet with rewards and cashback.</p>
+
+      <div class="wallet-balance-card">
+        <div class="balance-display">
+          <span class="balance-label">Current Balance</span>
+          <span class="balance-value">₹12,450</span>
+        </div>
+        <button class="btn btn-primary">Add Money</button>
+      </div>
+
+      <div class="wallet-grid">
+        <div class="wallet-feature">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/>
+            <path d="M4 6v12c0 1.1.9 2 2 2h14v-4"/>
+            <circle cx="20" cy="16" r="2"/>
+          </svg>
+          <h4>Cashback</h4>
+          <p>₹250 available</p>
+        </div>
+
+        <div class="wallet-feature">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10"/>
+            <path d="M16 2v6h6"/>
+          </svg>
+          <h4>Vouchers</h4>
+          <p>3 active</p>
+        </div>
+
+        <div class="wallet-feature healthcoins">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          <h4>HealthCoins</h4>
+          <p>450 coins</p>
+          <div class="coins-earn">
+            <small>Walk 10,000 steps → earn 10 coins daily</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Insurance Add-ons -->
+    <section class="lc-card" id="insuranceAddonsSection">
+      <h3>Insurance Add-ons</h3>
+      <p>Enhance your coverage with optional insurance plans.</p>
+
+      <div class="insurance-list">
+        <div class="insurance-item">
+          <div class="insurance-header">
+            <div>
+              <h4>Surgery Cover</h4>
+              <p>Up to ₹5L coverage for surgeries</p>
+            </div>
+            <div class="insurance-price">₹199/mo</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="surgeryCover" />
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+
+        <div class="insurance-item">
+          <div class="insurance-header">
+            <div>
+              <h4>Pre/Post Hospitalization</h4>
+              <p>60 days pre + 90 days post coverage</p>
+            </div>
+            <div class="insurance-price">₹149/mo</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="prePostCover" />
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+
+        <div class="insurance-item">
+          <div class="insurance-header">
+            <div>
+              <h4>Daily Hospital Cash</h4>
+              <p>₹500/day during hospitalization</p>
+            </div>
+            <div class="insurance-price">₹99/mo</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="dailyCash" />
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+
+        <div class="insurance-item">
+          <div class="insurance-header">
+            <div>
+              <h4>Family Add-On</h4>
+              <p>Extend coverage to 4 family members</p>
+            </div>
+            <div class="insurance-price">₹299/mo</div>
+          </div>
+          <div class="toggle-switch">
+            <input type="checkbox" id="familyCover" />
+            <span class="toggle-slider"></span>
+          </div>
+        </div>
+
+        <div class="insurance-total">
+          <span>Total Insurance Premium</span>
+          <span class="total-premium" id="totalPremium">₹0/mo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transaction History -->
+    <section class="lc-card" id="transactionHistorySection">
+      <h3>Transaction History</h3>
+      <p>View all your payments and bills.</p>
+
+      <div class="transaction-list">
+        <div class="transaction-item">
+          <div class="txn-icon paid">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="txn-details">
+            <h4>EMI Payment</h4>
+            <p>Apr 15, 2025 • 12:30 PM</p>
+          </div>
+          <div class="txn-amount paid">-₹4,500</div>
+          <button class="txn-download">↓</button>
+        </div>
+
+        <div class="transaction-item">
+          <div class="txn-icon paid">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="txn-details">
+            <h4>Hospital Bill</h4>
+            <p>Mar 22, 2025 • 3:45 PM</p>
+          </div>
+          <div class="txn-amount paid">-₹12,000</div>
+          <button class="txn-download">↓</button>
+        </div>
+
+        <div class="transaction-item">
+          <div class="txn-icon missed">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <div class="txn-details">
+            <h4>Missed EMI</h4>
+            <p>Feb 10, 2025 • Overdue</p>
+          </div>
+          <div class="txn-amount missed">-₹4,500</div>
+          <button class="txn-download">Pay</button>
+        </div>
+
+        <div class="transaction-item">
+          <div class="txn-icon refund">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            </svg>
+          </div>
+          <div class="txn-details">
+            <h4>Refund Processed</h4>
+            <p>Jan 18, 2025 • 11:20 AM</p>
+          </div>
+          <div class="txn-amount refund">+₹2,300</div>
+          <button class="txn-download">↓</button>
+        </div>
+
+        <div class="transaction-item">
+          <div class="txn-icon paid">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="txn-details">
+            <h4>Lab Bill</h4>
+            <p>Jan 5, 2025 • 9:15 AM</p>
+          </div>
+          <div class="txn-amount paid">-₹850</div>
+          <button class="txn-download">↓</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pre-Approved Limit Checker -->
+    <section class="lc-card" id="creditLimitSection">
+      <h3>Check Your Pre-Approved Limit</h3>
+      <p>Find out how much you're eligible for in seconds.</p>
+
+      <div class="limit-checker">
+        <div class="limit-form">
+          <div class="form-group">
+            <label class="form-label" for="aadhaarInput">Aadhaar Number</label>
+            <input type="text" id="aadhaarInput" class="form-control" placeholder="XXXX-XXXX-XXXX" maxlength="14" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="panInput">PAN Number</label>
+            <input type="text" id="panInput" class="form-control" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase;" />
+          </div>
+
+          <button class="btn btn-primary" id="checkLimitBtn" style="width:100%;">Check My Limit</button>
+        </div>
+
+        <div class="limit-result" id="limitResult" style="display:none;">
+          <div class="limit-display">
+            <span class="limit-label">Your Pre-Approved Limit</span>
+            <span class="limit-value">₹2,50,000</span>
+          </div>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">
+            Based on your credit profile, you're pre-approved for medical financing up to this amount.
+          </p>
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;">Apply Now</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Actions Row -->
+    <section class="lc-card" id="quickActionsSection">
+      <h3>Quick Actions</h3>
+      <p>Frequently used actions at your fingertips.</p>
+
+      <div class="quick-actions-scroll">
+        <div class="quick-action">
+          <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            </svg>
+          </div>
+          <span>Apply EMI</span>
+        </div>
+
+        <div class="quick-action">
+          <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+          </div>
+          <span>Pay EMI</span>
+        </div>
+
+        <div class="quick-action">
+          <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <span>Activate AutoPay</span>
+        </div>
+
+        <div class="quick-action">
+          <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+          </div>
+          <span>Redeem Points</span>
+        </div>
+
+        <div class="quick-action">
+          <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2v20M2 12h20"/>
+            </svg>
+          </div>
+          <span>Insurance Claims</span>
+        </div>
+
+        <div class="quick-action">
+          <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4"/>
+            </svg>
+          </div>
+          <span>Wallet Balance</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- QR Scan to Pay -->
+    <section class="lc-card" id="qrScanSection">
+      <h3>Scan QR to Pay Hospital Bill</h3>
+      <p>Pay directly at hospital by scanning their QR code.</p>
+
+      <div class="qr-pay-container">
+        <div class="qr-code-display">
+          <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+            <rect x="10" y="10" width="30" height="30" fill="var(--primary-color)"/>
+            <rect x="80" y="10" width="30" height="30" fill="var(--primary-color)"/>
+            <rect x="10" y="80" width="30" height="30" fill="var(--primary-color)"/>
+            <rect x="50" y="50" width="20" height="20" fill="var(--primary-color)"/>
+            <rect x="45" y="10" width="8" height="8" fill="var(--primary-color)"/>
+            <rect x="60" y="20" width="8" height="8" fill="var(--primary-color)"/>
+            <rect x="80" y="50" width="8" height="8" fill="var(--primary-color)"/>
+            <rect x="90" y="70" width="8" height="8" fill="var(--primary-color)"/>
+          </svg>
+          <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Sample QR Code</p>
+        </div>
+
+        <button class="btn btn-primary" id="openCameraBtn" style="width:100%; margin-top:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          Open Camera to Scan
+        </button>
+
+        <div class="qr-features">
+          <div class="qr-feature-item">✓ Instant payment verification</div>
+          <div class="qr-feature-item">✓ Works with all UPI apps</div>
+          <div class="qr-feature-item">✓ Secure & cashless</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="home.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      </svg>
+      <span class="nav-label">Home</span>
+    </a>
+    <a href="search.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <span class="nav-label">Search</span>
+    </a>
+    <a href="#" class="nav-fab">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+        <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+        <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+        <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+      </svg>
+    </a>
+    <a href="#" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      </svg>
+      <span class="nav-label">Finance</span>
+    </a>
+    <a href="appointments.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+      </svg>
+      <span class="nav-label">History</span>
+    </a>
+  </nav>
+
+  <script>
+    // Header location behaviour
+    const locationBtn = document.getElementById('locationBtn');
+    const locationText = document.getElementById('locationText');
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        () => { locationText.innerText = "Indiranagar, Bangalore"; },
+        () => { locationText.innerText = "Set Location"; }
+      );
+    } else {
+      locationText.innerText = "Set Location";
+    }
+
+    locationBtn.addEventListener('click', () => {
+      locationText.innerText = "Locating...";
+      setTimeout(() => { locationText.innerText = "Indiranagar, Bangalore"; }, 1500);
+    });
+
+    // EMI calculation
+    function calculateEMI() {
+      const amount = parseFloat(document.getElementById('amount').value || 0);
+      const months = parseInt(document.getElementById('tenure').value || 1, 10);
+      const rateYear = parseFloat(document.getElementById('interest').value || 0);
+      const rateMonth = rateYear / 12 / 100;
+
+      if (!months || amount <= 0) {
+        document.getElementById('emiValue').innerText = "₹ 0";
+        document.getElementById('totalPay').innerText = "₹ 0";
+        return;
+      }
+
+      let emi, total;
+      if (rateMonth === 0) {
+        emi = amount / months;
+        total = amount;
+      } else {
+        const factor = Math.pow(1 + rateMonth, months);
+        emi = amount * rateMonth * factor / (factor - 1);
+        total = emi * months;
+      }
+
+      document.getElementById('emiValue').innerText = "₹ " + emi.toFixed(0);
+      document.getElementById('totalPay').innerText = "₹ " + total.toFixed(0);
+    }
+
+    document.getElementById('amount').addEventListener('input', calculateEMI);
+    document.getElementById('tenure').addEventListener('change', calculateEMI);
+    document.getElementById('interest').addEventListener('change', calculateEMI);
+
+    document.getElementById('checkBtn').addEventListener('click', () => {
+      document.getElementById('eligibilityText').innerHTML = "Eligibility: <strong>Looks good for quick pre‑approval</strong>";
+    });
+
+    document.getElementById('applyNow').addEventListener('click', () => {
+      alert('LifeCord EMI application flow will open here.');
+    });
+
+    calculateEMI();
+
+    // Bill Splitter Logic
+    const insuranceToggle = document.getElementById('insuranceSplit');
+    const insuranceRange = document.getElementById('insuranceRange');
+    const walletRange = document.getElementById('walletRange');
+    const insuranceAmountSpan = document.getElementById('insuranceAmount');
+    const walletAmountSpan = document.getElementById('walletAmount');
+    const emiSplitAmountSpan = document.getElementById('emiSplitAmount');
+
+    function updateSplit() {
+      const totalBill = 75000;
+      let insuranceAmt = insuranceToggle.checked ? parseInt(insuranceRange.value) : 0;
+      let walletAmt = parseInt(walletRange.value);
+      let emiAmt = totalBill - insuranceAmt - walletAmt;
+      
+      if (emiAmt < 0) {
+        walletAmt = totalBill - insuranceAmt;
+        walletRange.value = walletAmt;
+        emiAmt = 0;
+      }
+
+      insuranceAmountSpan.innerText = '₹' + insuranceAmt.toLocaleString();
+      walletAmountSpan.innerText = '₹' + walletAmt.toLocaleString();
+      emiSplitAmountSpan.innerText = '₹' + emiAmt.toLocaleString();
+    }
+
+    insuranceToggle.addEventListener('change', updateSplit);
+    insuranceRange.addEventListener('input', updateSplit);
+    walletRange.addEventListener('input', updateSplit);
+    updateSplit();
+
+    // Insurance Add-ons Total Calculation
+    const insuranceCheckboxes = document.querySelectorAll('#insuranceAddonsSection input[type="checkbox"]');
+    const totalPremiumSpan = document.getElementById('totalPremium');
+    const premiumValues = {
+      surgeryCover: 199,
+      prePostCover: 149,
+      dailyCash: 99,
+      familyCover: 299
+    };
+
+    function updateInsuranceTotal() {
+      let total = 0;
+      insuranceCheckboxes.forEach(cb => {
+        if (cb.checked && premiumValues[cb.id]) {
+          total += premiumValues[cb.id];
+        }
+      });
+      totalPremiumSpan.innerText = '₹' + total + '/mo';
+    }
+
+    insuranceCheckboxes.forEach(cb => {
+      cb.addEventListener('change', updateInsuranceTotal);
+    });
+
+    // Credit Limit Checker
+    document.getElementById('checkLimitBtn').addEventListener('click', () => {
+      const aadhaar = document.getElementById('aadhaarInput').value;
+      const pan = document.getElementById('panInput').value;
+      
+      if (aadhaar.length >= 12 && pan.length >= 10) {
+        document.getElementById('limitResult').style.display = 'block';
+      } else {
+        alert('Please enter valid Aadhaar and PAN numbers.');
+      }
+    });
+
+    // Open Camera for QR Scan
+    document.getElementById('openCameraBtn').addEventListener('click', () => {
+      alert('Camera access would open here for QR scanning.');
+    });
+  </script>
+</body>
+</html>

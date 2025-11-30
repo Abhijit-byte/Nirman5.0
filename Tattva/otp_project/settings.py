@@ -39,12 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',  
+    'accounts',  # Your OTP app
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Whitenoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,14 +83,17 @@ import dj_database_url
 import os
 
 # Your provided PostgreSQL connection URL
-DATABASE_URL = "postgresql://postgres:jVIiAMXvKvcplkxEdINtkcEQPPdnSgOv@shuttle.proxy.rlwy.net:22228/railway"
+DATABASE_URL = "postgresql://postgres:hnzODQjiNmZDOrlgwzFStzpOSaRadYrA@interchange.proxy.rlwy.net:43743/railway"
 
 # 1. Set the DATABASES environment variable (optional, but good practice for reading environment variables)
 # os.environ["DATABASE_URL"] = DATABASE_URL 
 
 # 2. Use dj_database_url to parse the URL and configure the default database.
 DATABASES = {
-
+    'default': dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600  # Optional: Reuses connections for better performance
+    )
 }
 
 # Password validation
@@ -145,6 +148,9 @@ LOGIN_URL = 'staff_login'
 
 # Custom settings for LifeCord
 
+# Ultramsg WhatsApp OTP Configuration
+ULTRAMSG_INSTANCE_ID = os.getenv('ULTRAMSG_INSTANCE_ID')
+ULTRAMSG_TOKEN = os.getenv('ULTRAMSG_TOKEN')
 
 # Session settings
 SESSION_COOKIE_AGE = 86400  # 24 hours

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeCord - My Prescriptions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E64A19;
+            --primary-light: #FFE0B2;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --border: #E2E8F0;
+            
+            --success: #10B981;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --danger: #EF4444;
+            
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --nav-height: 70px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-body); color: var(--text-main); padding-bottom: 80px; }
+
+        /* --- Header --- */
+        .header {
+            background: var(--card-bg);
+            height: var(--nav-height);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .brand { font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .nav-icon-wrapper { position: relative; }
+
+        /* Notification Bell */
+        .notif-btn { 
+            width: 40px; height: 40px; border-radius: 50%; background: #F3F4F6; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            transition: background 0.2s; color: var(--text-main); font-size: 1.2rem;
+        }
+        .notif-btn:hover { background: #E5E7EB; color: var(--primary); }
+        .notif-badge { 
+            position: absolute; top: 0; right: 0; background: var(--danger); color: white; 
+            font-size: 0.7rem; width: 16px; height: 16px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid white;
+        }
+
+        /* Profile Icon */
+        .profile-icon { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3); }
+
+        /* Dropdowns */
+        .dropdown-menu {
+            position: absolute; top: 55px; right: 0; width: 300px; 
+            background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+            border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000;
+            overflow: hidden; animation: fadeDown 0.2s ease;
+        }
+        .dropdown-menu.show { display: flex; }
+        
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Profile Menu Specifics */
+        .profile-menu { width: 280px; }
+        .profile-header { padding: 20px; background: var(--bg-body); border-bottom: 1px solid var(--border); }
+        .p-name { font-weight: 700; font-size: 1.1rem; color: var(--text-main); }
+        .p-abha { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; font-family: monospace; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+
+        .dropdown-item { 
+            padding: 12px 20px; display: flex; align-items: center; gap: 12px; 
+            color: var(--text-main); font-size: 0.9rem; cursor: pointer; transition: background 0.2s; text-decoration: none;
+        }
+        .dropdown-item:hover { background: #F9FAFB; color: var(--primary); }
+        .dropdown-item.danger { color: var(--danger); }
+        .dropdown-item.danger:hover { background: #FEF2F2; }
+        .dropdown-item i { width: 20px; text-align: center; color: var(--text-muted); }
+        .dropdown-item:hover i { color: var(--primary); }
+        .dropdown-item.danger i { color: var(--danger); }
+
+        .menu-section-label { 
+            padding: 10px 20px 5px; font-size: 0.75rem; font-weight: 700; 
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; 
+        }
+        .dropdown-divider { height: 1px; background: var(--border); margin: 5px 0; }
+
+        /* Toggle Switch */
+        .toggle-item { justify-content: space-between; }
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        /* Notifications */
+        .notif-item { padding: 15px; border-bottom: 1px solid var(--bg-body); display: flex; gap: 12px; align-items: start; cursor: pointer; transition: background 0.2s; }
+        .notif-item:hover { background: #FFF7ED; }
+        .notif-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+        .notif-content div { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; color: var(--text-main); }
+        .notif-content p { font-size: 0.75rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+        .notif-time { font-size: 0.7rem; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+        
+        .bg-green-light { background: #DCFCE7; color: #166534; }
+        .bg-blue-light { background: #E0F2FE; color: #075985; }
+        .bg-orange-light { background: #FFEDD5; color: #9A3412; }
+
+        /* --- Main Container --- */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+
+        /* Search & Filter */
+        .controls { margin-bottom: 25px; }
+        .search-bar { position: relative; margin-bottom: 15px; }
+        .search-bar input {
+            width: 100%; padding: 15px 15px 15px 45px; border-radius: 12px;
+            border: 1px solid var(--border); outline: none; font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .search-bar input:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        /* View Toggles */
+        .view-toggles {
+            display: flex; background: #F3F4F6; padding: 5px; border-radius: 12px; margin-bottom: 20px;
+        }
+        .view-btn {
+            flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 600; color: var(--text-muted); transition: all 0.2s;
+        }
+        .view-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* --- Prescription Card --- */
+        .rx-card {
+            background: var(--card-bg); border-radius: var(--radius); padding: 20px;
+            margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); position: relative;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s;
+            cursor: pointer; border: 1px solid transparent;
+        }
+        /* Hover Effect */
+        .rx-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -5px rgba(255, 107, 53, 0.15);
+            border-color: var(--primary-light);
+        }
+
+        .rx-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .doc-info h4 { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 2px; }
+        .doc-info p { font-size: 0.85rem; color: var(--text-muted); }
+        .rx-date { font-size: 0.8rem; color: var(--text-muted); background: #F3F4F6; padding: 4px 8px; border-radius: 6px; }
+
+        .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+        .rx-tag { font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+        .tag-fever { background: #FEE2E2; color: #991B1B; }
+        .tag-ortho { background: #E0F2FE; color: #075985; }
+        .tag-gen { background: #DCFCE7; color: #166534; }
+        .tag-diab { background: #FEF3C7; color: #92400E; }
+
+        .med-list { margin-bottom: 15px; background: #FAFAFA; padding: 12px; border-radius: 8px; border: 1px dashed var(--border); }
+        .med-item { font-size: 0.9rem; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .med-item:last-child { margin-bottom: 0; }
+        .med-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+        .lab-link { margin-top: 10px; font-size: 0.85rem; color: var(--info); display: flex; align-items: center; gap: 6px; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid #F3F4F6; }
+        .rx-type { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        .type-abha { color: #EA580C; font-weight: 600; }
+
+        .action-group { display: flex; gap: 10px; }
+        .btn-sm { padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; gap: 5px; }
+        .btn-view { background: var(--primary-light); color: var(--primary-dark); }
+        .btn-view:hover { background: #FFCC80; }
+        .btn-share { background: #F3E8FF; color: #7E22CE; }
+        .btn-share:hover { background: #E9D5FF; }
+
+        /* FAB Upload */
+        .fab-upload {
+            position: fixed; bottom: 90px; right: 20px; width: 56px; height: 56px;
+            background: var(--primary); border-radius: 50%; box-shadow: 0 10px 20px rgba(255, 107, 53, 0.4);
+            display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; 
+            cursor: pointer; z-index: 95; transition: transform 0.2s;
+        }
+        .fab-upload:hover { transform: scale(1.1); }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal { background: white; width: 90%; max-width: 500px; border-radius: 24px; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.25); animation: slideUp 0.3s ease-out; }
+        
+        .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 20px; overflow-y: auto; max-height: 70vh; }
+        .modal-footer { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+        
+        /* Compact Viewer Modal Specifics */
+        .viewer-box { 
+            max-width: 600px; /* Reduced size */
+            width: 85%;
+        }
+        .viewer-content { 
+            min-height: 300px; /* Prevent overly tall empty space */
+            display: flex; align-items: center; justify-content: center; background: #111; color: #888; 
+            border-radius: 12px; margin-bottom: 10px;
+        }
+
+        .upload-options { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .upload-option { border: 2px dashed var(--border); padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; transition: all 0.2s; }
+        .upload-option:hover { border-color: var(--primary); background: #FFF7ED; }
+        .upload-option i { font-size: 2rem; color: var(--text-muted); margin-bottom: 10px; }
+        .upload-option:hover i { color: var(--primary); }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+        .form-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 12px; font-size: 0.95rem; outline: none; }
+        .form-input:focus { border-color: var(--primary); }
+
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Bottom Nav (Mobile) */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 90; padding-bottom: 10px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 0.75rem; text-decoration: none; }
+        .nav-item.active { color: var(--primary); font-weight: 600; }
+        .nav-item i { font-size: 1.2rem; }
+        @media(min-width: 768px) { .bottom-nav { display: none; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="brand">
+            <div style="width:32px; height:32px; background:var(--gradient-primary); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;">
+                <i class="fas fa-file-prescription"></i>
+            </div>
+            <span>My Prescriptions</span>
+        </div>
+        
+        <div class="nav-right">
+            <!-- Notifications -->
+            <div class="nav-icon-wrapper">
+                <div class="notif-btn" onclick="toggleNotifMenu(event)">
+                    <div class="notif-badge">1</div>
+                    <i class="far fa-bell"></i>
+                </div>
+                <div class="dropdown-menu" id="notifDropdown" style="width: 320px;">
+                    <div class="notif-item">
+                        <div class="notif-icon bg-green-light"><i class="fas fa-plus-circle"></i></div>
+                        <div class="notif-content">
+                            <div>New Prescription</div>
+                            <p>Dr. Sharma uploaded a new prescription.</p>
+                        </div>
+                        <div class="notif-time">5m</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div class="nav-icon-wrapper">
+                <div class="profile-icon" onclick="toggleProfileMenu(event)">JD</div>
+                <div class="dropdown-menu profile-menu" id="profileDropdown">
+                    <div class="profile-header">
+                        <div class="p-name">John Doe</div>
+                        <div class="p-abha">ABHA: 14-2563-8890-1234</div>
+                    </div>
+                    <a class="dropdown-item" href="#"><i class="fas fa-user-edit"></i> Edit Profile</a>
+                    <div class="menu-section-label">Security</div>
+                    <a class="dropdown-item" href="#"><i class="fas fa-key"></i> Change Password</a>
+                    <div class="dropdown-item toggle-item">
+                        <span style="display:flex; gap:12px; align-items:center;"><i class="fas fa-shield-alt"></i> 2-Step Login</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider round"></span></label>
+                    </div>
+                    <div class="menu-section-label">Help</div>
+                    <a class="dropdown-item" href="#"><i class="fas fa-question-circle"></i> Help Center</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item danger" onclick="alert('Logged out')"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- Search & View Toggle -->
+        <div class="controls">
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search doctor, condition, or medicine..." onkeyup="filterRx()">
+            </div>
+            
+            <div class="view-toggles">
+                <div class="view-btn active" onclick="switchView('recent', this)">Recent Prescriptions</div>
+                <div class="view-btn" onclick="switchView('history', this)">Prescription History</div>
+            </div>
+        </div>
+
+        <!-- Prescription List -->
+        <div id="rxList">
+            <!-- Dynamic Content -->
+        </div>
+
+    </main>
+
+    <!-- Upload FAB -->
+    <div class="fab-upload" onclick="openUploadModal()">
+        <i class="fas fa-plus"></i>
+    </div>
+
+    <!-- Viewer Modal (Compact) -->
+    <div id="viewerModal" class="modal-overlay">
+        <div class="modal viewer-box">
+            <div class="modal-header">
+                <h3 id="viewDocName" style="font-size:1.1rem;">Dr. Name</h3>
+                <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="closeModal('viewerModal')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:10px;">
+                <div class="viewer-content">
+                    <div style="text-align:center;">
+                        <i class="fas fa-file-prescription" style="font-size:4rem; color:#555;"></i>
+                        <p style="margin-top:10px; font-size:0.9rem;">Prescription Preview</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-sm" style="background:#eee;" onclick="closeModal('viewerModal')">Close</button>
+                <button class="btn-sm" style="background:var(--primary); color:white;" onclick="alert('Downloading...')"><i class="fas fa-download"></i> Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal" style="height:auto; max-width:400px;">
+            <div class="modal-header">
+                <h3>Share Prescription</h3>
+                <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="closeModal('shareModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:15px; color:var(--text-muted); font-size:0.9rem;">Select who you want to share this prescription with:</p>
+                <div style="display:flex; gap:10px; flex-direction:column;">
+                    <div class="dropdown-item" onclick="alert('Shared with Doctor!')"><i class="fas fa-user-md"></i> My Doctor</div>
+                    <div class="dropdown-item" onclick="alert('Sent to Pharmacy!')"><i class="fas fa-pills"></i> Nearby Pharmacy</div>
+                    <div class="dropdown-item" onclick="alert('Link Copied!')"><i class="fas fa-link"></i> Copy Link</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal-overlay">
+        <div class="modal" style="height:auto;">
+            <div class="modal-header">
+                <h3>Add Prescription</h3>
+                <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="closeModal('uploadModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Doctor Name</label>
+                    <input type="text" class="form-input" placeholder="e.g. Dr. Sharma">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" class="form-input">
+                </div>
+                
+                <label style="display:block; margin-bottom:5px; font-size:0.85rem; font-weight:600; color:var(--text-muted);">Upload File</label>
+                <div class="upload-options">
+                    <div class="upload-option" onclick="alert('Opening Camera...')">
+                        <i class="fas fa-camera"></i>
+                        <div>Camera</div>
+                    </div>
+                    <div class="upload-option" onclick="alert('Opening File Picker...')">
+                        <i class="fas fa-file-upload"></i>
+                        <div>Gallery</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top:20px; text-align:center;">
+                    <p style="font-size:0.9rem; color:var(--text-muted);">Or sync from</p>
+                    <button class="btn-sm" style="width:100%; justify-content:center; margin-top:10px; background:#EFF6FF; color:#1D4ED8; border:1px solid #BFDBFE;" onclick="alert('Fetching from ABHA...')">
+                        <i class="fas fa-fingerprint"></i> ABHA Health Locker
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="bottom-nav">
+        <a href="homepage.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="medicine_page.html" class="nav-item">
+            <i class="fas fa-pills"></i>
+            <span>Meds</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-file-prescription"></i>
+            <span>Rx</span>
+        </a>
+    </nav>
+
+    <script>
+        // Mock Data
+        const recentRx = [
+            { id: 1, date: "28 Nov 2025", doctor: "Dr. Anjali Gupta", spec: "General Physician", clinic: "Apollo Clinic", meds: ["Dolo 650 (SOS)", "Vit C (1x Daily)"], tests: "CBC - Completed", type: "abha", tag: "Fever" },
+            { id: 2, date: "15 Nov 2025", doctor: "Dr. Rajesh Kumar", spec: "Orthopedic", clinic: "City Bone Center", meds: ["Calcium Sandoz", "Painkiller Gel"], tests: "X-Ray - Pending", type: "upload", tag: "Ortho" },
+            { id: 3, date: "01 Nov 2025", doctor: "Dr. Priya Sharma", spec: "Diabetologist", clinic: "Sugar Care", meds: ["Metformin 500", "Diet Plan"], tests: "Hba1c - Completed", type: "abha", tag: "Diabetes" },
+            { id: 4, date: "20 Oct 2025", doctor: "Dr. Sameer Khan", spec: "ENT Specialist", clinic: "Khan ENT", meds: ["Nasal Drops", "Antibiotic"], tests: "None", type: "upload", tag: "General" },
+            { id: 5, date: "05 Oct 2025", doctor: "Dr. Neha Verma", spec: "Dermatologist", clinic: "Skin Glow", meds: ["Ointment A", "Face Wash"], tests: "None", type: "upload", tag: "General" }
+        ];
+
+        const historyRx = [
+            { id: 6, date: "12 Aug 2025", doctor: "Dr. K. Menon", spec: "Cardiologist", clinic: "Heart Inst.", meds: ["Aspirin", "Statin"], tests: "ECG - Completed", type: "abha", tag: "Heart" },
+            { id: 7, date: "30 Jul 2025", doctor: "Dr. Anjali Gupta", spec: "General Physician", clinic: "Apollo Clinic", meds: ["Cough Syrup"], tests: "None", type: "upload", tag: "Fever" },
+            { id: 8, date: "10 Jun 2025", doctor: "Dr. Ravi Teja", spec: "Dentist", clinic: "Smile Dental", meds: ["Painkiller", "Mouthwash"], tests: "X-Ray - Completed", type: "upload", tag: "General" },
+            { id: 9, date: "15 May 2025", doctor: "Dr. S. Reddy", spec: "Ophthalmologist", clinic: "Vision Care", meds: ["Eye Drops"], tests: "Vision Test", type: "abha", tag: "General" },
+            { id: 10, date: "01 Apr 2025", doctor: "Dr. Rajesh Kumar", spec: "Orthopedic", clinic: "City Bone Center", meds: ["Calcium"], tests: "None", type: "upload", tag: "Ortho" },
+            { id: 11, date: "20 Feb 2025", doctor: "Dr. Priya Sharma", spec: "Diabetologist", clinic: "Sugar Care", meds: ["Insulin"], tests: "Blood Sugar", type: "abha", tag: "Diabetes" },
+            { id: 12, date: "10 Jan 2025", doctor: "Dr. Anjali Gupta", spec: "General Physician", clinic: "Apollo Clinic", meds: ["Multivitamin"], tests: "Full Body", type: "upload", tag: "General" },
+            { id: 13, date: "05 Dec 2024", doctor: "Dr. B. Singh", spec: "Neurologist", clinic: "Neuro Center", meds: ["Supplement"], tests: "MRI", type: "upload", tag: "General" },
+            { id: 14, date: "20 Nov 2024", doctor: "Dr. L. Das", spec: "Pediatrician", clinic: "Kids Care", meds: ["Vaccine"], tests: "None", type: "abha", tag: "General" },
+            { id: 15, date: "15 Oct 2024", doctor: "Dr. K. Menon", spec: "Cardiologist", clinic: "Heart Inst.", meds: ["BP Meds"], tests: "Echo", type: "abha", tag: "Heart" },
+             { id: 16, date: "05 Sep 2024", doctor: "Dr. R. Singh", spec: "General", clinic: "Health Clinic", meds: ["Paracetamol"], tests: "None", type: "upload", tag: "Fever" },
+             { id: 17, date: "12 Aug 2024", doctor: "Dr. A. Roy", spec: "Ortho", clinic: "Bone Care", meds: ["D3"], tests: "X-Ray", type: "abha", tag: "Ortho" }
+        ];
+
+        const rxListContainer = document.getElementById('rxList');
+        let currentView = 'recent'; // 'recent' or 'history'
+
+        function renderRx(filterText = "") {
+            rxListContainer.innerHTML = "";
+            const data = currentView === 'recent' ? recentRx : historyRx;
+
+            const filtered = data.filter(r => 
+                r.doctor.toLowerCase().includes(filterText.toLowerCase()) || 
+                r.tag.toLowerCase().includes(filterText.toLowerCase()) ||
+                r.meds.some(m => m.toLowerCase().includes(filterText.toLowerCase()))
+            );
+
+            if(filtered.length === 0) {
+                rxListContainer.innerHTML = `<div style="text-align:center; padding:40px; color:#9CA3AF;">No prescriptions found.</div>`;
+                return;
+            }
+
+            filtered.forEach(r => {
+                let tagColor = 'tag-gen';
+                if(r.tag === 'Fever') tagColor = 'tag-fever';
+                if(r.tag === 'Ortho') tagColor = 'tag-ortho';
+                if(r.tag === 'Diabetes') tagColor = 'tag-diab';
+
+                const medsHtml = r.meds.map(m => `<div class="med-item"><span>${m}</span></div>`).join('');
+                const typeHtml = r.type === 'abha' ? `<span class="type-abha"><i class="fas fa-fingerprint"></i> ABHA Linked</span>` : `<span><i class="fas fa-cloud-upload-alt"></i> Uploaded</span>`;
+
+                const html = `
+                <div class="rx-card">
+                    <div class="card-header">
+                        <div class="doc-info">
+                            <h4>${r.doctor}</h4>
+                            <p>${r.spec} • ${r.clinic}</p>
+                        </div>
+                        <div class="rx-date">${r.date}</div>
+                    </div>
+                    
+                    <div class="tag-row">
+                        <span class="rx-tag ${tagColor}">${r.tag}</span>
+                    </div>
+
+                    <div class="med-list">
+                        ${medsHtml}
+                    </div>
+
+                    <div class="lab-link">
+                        <i class="fas fa-flask"></i> ${r.tests}
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="rx-type">${typeHtml}</div>
+                        <div class="action-group">
+                            <button class="btn-sm btn-share" onclick="openShareModal()"><i class="fas fa-share-alt"></i> Share</button>
+                            <button class="btn-sm btn-view" onclick="openViewer('${r.doctor}')"><i class="fas fa-eye"></i> View</button>
+                        </div>
+                    </div>
+                </div>
+                `;
+                rxListContainer.innerHTML += html;
+            });
+        }
+
+        function switchView(view, el) {
+            currentView = view;
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderRx(document.getElementById('searchInput').value);
+        }
+
+        function filterRx() {
+            renderRx(document.getElementById('searchInput').value);
+        }
+
+        // --- Modals & Toggles ---
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            document.getElementById('notifDropdown').classList.remove('show');
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+        function toggleNotifMenu(e) {
+            e.stopPropagation();
+            document.getElementById('profileDropdown').classList.remove('show');
+            document.getElementById('notifDropdown').classList.toggle('show');
+        }
+        window.onclick = function(event) {
+            if (!event.target.closest('.nav-icon-wrapper')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            }
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        function openViewer(docName) {
+            document.getElementById('viewDocName').innerText = "Rx: " + docName;
+            document.getElementById('viewerModal').style.display = 'flex';
+        }
+        function openShareModal() { document.getElementById('shareModal').style.display = 'flex'; }
+        function openUploadModal() { document.getElementById('uploadModal').style.display = 'flex'; }
+        
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        // Init
+        renderRx();
+
+    </script>
+</body>
+</html>

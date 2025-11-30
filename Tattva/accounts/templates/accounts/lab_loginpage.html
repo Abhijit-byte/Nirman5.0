@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCord Doctor - Secure Login</title>
+    <title>LifeCord Lab - Partner Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,13 +23,13 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; outline: none; -webkit-tap-highlight-color: transparent; }
         
-        /* Mobile-First Base Layout - Allows scrolling if needed */
+        /* Mobile-First Base Layout */
         body { 
             min-height: 100vh; 
             width: 100%; 
             display: flex; 
             background-color: var(--bg-body);
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden;
         }
 
         /* --- SPLIT LAYOUT --- */
@@ -46,7 +46,7 @@
             padding: 60px;
             color: white;
             overflow: hidden;
-            height: 100vh; /* Full height fixed for desktop brand side */
+            height: 100vh;
             position: sticky;
             top: 0;
         }
@@ -64,6 +64,8 @@
         .brand-content { position: relative; z-index: 10; max-width: 500px; animation: slideRight 0.8s ease-out; }
         .brand-logo { font-size: 3rem; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
         .brand-desc { font-size: 1.2rem; line-height: 1.6; opacity: 0.9; font-weight: 300; }
+        
+        /* UPDATED FEATURE LIST BASED ON DASHBOARD FILE */
         .feature-list { margin-top: 40px; list-style: none; }
         .feature-list li { margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 15px; }
         .feature-list i { background: rgba(255,255,255,0.2); width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
@@ -78,7 +80,7 @@
             align-items: center;
             padding: 40px;
             position: relative;
-            min-height: 100vh; /* Ensure full height */
+            min-height: 100vh;
         }
 
         .login-card {
@@ -86,6 +88,8 @@
             max-width: 420px;
             padding: 20px;
             animation: fadeIn 0.8s ease-out;
+            position: relative;
+            z-index: 2;
         }
 
         .login-header { margin-bottom: 40px; }
@@ -120,12 +124,12 @@
             color: var(--text-muted); cursor: pointer;
         }
 
-        /* Actions */
-        .form-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; font-size: 0.9rem; }
-        .remember-me { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-muted); }
+        /* Actions (Forgot Password) */
+        .form-actions { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 20px; font-size: 0.9rem; }
         .forgot-link { color: var(--primary); text-decoration: none; font-weight: 600; }
         .forgot-link:hover { text-decoration: underline; }
 
+        /* Button */
         .btn-login {
             width: 100%; padding: 16px; border: none; border-radius: 12px;
             background: var(--gradient-primary); color: white;
@@ -147,7 +151,7 @@
             opacity: 0.7;
         }
 
-        /* MODAL */
+        /* Support Modal */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 1000;
@@ -165,24 +169,54 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* --- RESPONSIVE --- */
+        /* --- RESPONSIVE MOBILE THEME --- */
         @media (max-width: 900px) {
             .brand-section { display: none; } /* Hide decorative side on mobile */
             
             .login-section { 
                 width: 100%; 
-                background: var(--bg-body); 
-                padding: 20px; /* Less padding on mobile */
+                background: #FDFDFD; 
+                padding: 0; 
+                align-items: flex-start; 
             }
             
+            /* Decorative Header Background */
+            .login-section::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; width: 100%; height: 280px;
+                background: var(--gradient-primary);
+                border-bottom-left-radius: 40px;
+                border-bottom-right-radius: 40px;
+                z-index: 0;
+            }
+            
+            /* Mobile Logo */
+            .login-section::after {
+                content: 'LifeCord Lab';
+                position: absolute;
+                top: 60px; left: 0; width: 100%;
+                text-align: center;
+                color: white;
+                font-size: 1.8rem;
+                font-weight: 800;
+                z-index: 1;
+                letter-spacing: -0.5px;
+            }
+
             .login-card { 
                 background: white; 
-                border-radius: 20px; 
-                padding: 30px 20px; 
-                box-shadow: var(--shadow); 
+                border-radius: 24px; 
+                padding: 40px 30px; 
+                box-shadow: 0 20px 60px rgba(0,0,0,0.15); 
+                margin: 140px auto 40px auto; 
+                width: 90%;
             }
             
-            .login-header h2 { font-size: 1.8rem; }
+            .login-header { text-align: center; margin-bottom: 30px; }
+            .login-header h2 { font-size: 1.6rem; }
+            
+            .security-badge { position: relative; bottom: 0; margin-bottom: 30px; width: 100%; }
         }
 
     </style>
@@ -191,16 +225,18 @@
 
     <div class="split-container">
         
-        <!-- LEFT: Branding (Hidden on Mobile) -->
+        <!-- LEFT: Branding -->
         <div class="brand-section">
             <div class="brand-content">
-                <div class="brand-logo"><i class="fas fa-heartbeat"></i> LifeCord Doc</div>
-                <p class="brand-desc">The Next-Gen Clinical Operating System.</p>
+                <div class="brand-logo"><i class="fas fa-microscope"></i> LifeCord Lab</div>
+                <p class="brand-desc">Diagnostics Intelligence Platform.</p>
+                
+                <!-- UPDATED FEATURE LIST FROM DASHBOARD FILE -->
                 <ul class="feature-list">
-                    <li><i class="fas fa-magic"></i> AI Ambient Scribe</li>
-                    <li><i class="fas fa-chart-line"></i> Real-time Vitals Monitoring</li>
-                    <li><i class="fas fa-shield-alt"></i> HIPAA Compliant Security</li>
-                    <li><i class="fas fa-user-md"></i> Seamless Digital Prescriptions</li>
+                    <li><i class="fas fa-chart-pie"></i> Real-time Report Dashboard</li>
+                    <li><i class="fas fa-cloud-upload-alt"></i> Secure Report Uploads</li>
+                    <li><i class="fas fa-search"></i> Advanced Patient Search</li>
+                    <li><i class="fas fa-tasks"></i> Workflow Status Tracking</li>
                 </ul>
             </div>
         </div>
@@ -209,39 +245,38 @@
         <div class="login-section">
             <div class="login-card">
                 <div class="login-header">
-                    <h2>Welcome Back</h2>
-                    <p>Enter your unique ID to access your dashboard.</p>
+                    <h2>Partner Access</h2>
+                    <p>Log in to your Diagnostic Center Dashboard.</p>
                 </div>
 
                 <form id="loginForm" onsubmit="handleLogin(event)">
                     
-                    <!-- UID Input -->
+                    <!-- Lab ID Input -->
                     <div class="form-group">
-                        <input type="number" name="doc_id" id="docUid" class="form-input" placeholder=" " required>
-                        <label class="form-label">Doctor UID (e.g. DOC-1023)</label>
+                        <input type="text" id="labUid" class="form-input" placeholder=" " required>
+                        <label class="form-label">Lab License / UID (e.g. LAB-5521)</label>
                     </div>
 
                     <!-- Password Input -->
                     <div class="form-group">
-                        <input type="number" name="pin" id="docPass" class="form-input" placeholder=" " required>
+                        <input type="password" id="docPass" class="form-input" placeholder=" " required>
                         <label class="form-label">Password</label>
                         <i class="fas fa-eye password-toggle" onclick="togglePassword()"></i>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="form-actions">
-                        <label class="remember-me">
-                            <input type="checkbox"> Remember me
+                    <!-- Forgot Password Link -->
+                    <div class="form-actions" style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-muted); cursor: pointer;">
+                            <input type="checkbox" id="rememberMe"> Remember me
                         </label>
                         <a href="#" class="forgot-link" onclick="openModal('forgotModal')">Forgot Password?</a>
                     </div>
 
                     <!-- Button -->
-                    <button type="submit" class="btn-login">Secure Login <i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
+                    <button type="submit" class="btn-login" onclick="window.location.href='{% url 'lab_dashboard' %}'">Secure Login <i class="fas fa-arrow-right" style="margin-left:8px;"></i></button>
 
                 </form>
 
-                <!-- Removed Registration Links -->
                 <div class="footer-links">
                     <p><a href="#" onclick="openModal('supportModal')">Need Technical Help?</a></p>
                 </div>
@@ -259,10 +294,10 @@
         <div class="modal-box">
             <div style="color:var(--primary); font-size:3rem; margin-bottom:10px;"><i class="fas fa-key"></i></div>
             <h3 style="font-size:1.5rem; margin-bottom:10px;">Reset Password</h3>
-            <p style="color:var(--text-muted); margin-bottom:20px;">Enter your registered email or Doctor UID to receive a reset link.</p>
+            <p style="color:var(--text-muted); margin-bottom:20px;">Enter your Lab License ID to receive a reset link on the registered email.</p>
             <div class="form-group" style="text-align:left;">
                 <input type="text" class="form-input" placeholder=" " id="resetInput">
-                <label class="form-label">Email or UID</label>
+                <label class="form-label">Lab License ID</label>
             </div>
             <button class="btn-login" onclick="simulateReset()">Send Reset Link</button>
             <button class="btn-login" style="background:transparent; color:var(--text-muted); box-shadow:none; margin-top:5px;" onclick="closeModal('forgotModal')">Cancel</button>
@@ -274,7 +309,7 @@
         <div class="modal-box">
             <div style="color:var(--text-main); font-size:3rem; margin-bottom:10px;"><i class="fas fa-headset"></i></div>
             <h3 style="font-size:1.5rem; margin-bottom:10px;">Support Team</h3>
-            <p style="color:var(--text-muted); margin-bottom:20px;">Call us at <strong>+91-1800-LIFE-CORD</strong> or email support@lifecord.com</p>
+            <p style="color:var(--text-muted); margin-bottom:20px;">For access issues or API integration, contact our dedicated Lab Support line at <strong>+91-1800-LIFE-LAB</strong>.</p>
             <button class="btn-login" onclick="closeModal('supportModal')">Close</button>
         </div>
     </div>
@@ -297,30 +332,24 @@
 
         // --- LOGIN LOGIC ---
         function handleLogin(e) {
-    e.preventDefault();
+            e.preventDefault();
+            const uid = document.getElementById('labUid').value.trim();
+            const pass = document.getElementById('docPass').value;
 
-    const uid = document.getElementById("docUid").value.trim();
-    const pin = document.getElementById("docPass").value.trim();
+            if(uid && pass) {
+                const btn = document.querySelector('.btn-login');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Verifying License...';
+                btn.style.opacity = '0.8';
 
-    fetch("/doctor_login/", {   // <-- URL in urls.py must match
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}",
-        },
-        body: JSON.stringify({ doc_id: uid, pin: pin })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            window.location.href = data.redirect_url;   // redirect to dashboard
-        } else {
-            alert(data.message);
+                setTimeout(() => {
+                    alert(`Access Granted for Lab: ${uid}`);
+                    // In real app: window.location.href = 'lab_dashboard.html';
+                    btn.innerHTML = originalText;
+                    btn.style.opacity = '1';
+                }, 1500);
+            }
         }
-    })
-    .catch(error => console.error("Error:", error));
-}
-
 
         // --- MODALS ---
         function openModal(id) {
@@ -334,11 +363,11 @@
         function simulateReset() {
             const input = document.getElementById('resetInput').value;
             if(!input) {
-                alert("Please enter your Email or UID.");
+                alert("Please enter your Lab License ID.");
                 return;
             }
             closeModal('forgotModal');
-            alert(`✅ Password reset link sent to ${input}`);
+            alert(`✅ Password reset link sent to email registered with ${input}`);
         }
 
         // Close modal on outside click

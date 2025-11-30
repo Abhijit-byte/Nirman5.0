@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeCord - Pharmacy OS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- HTML2PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- THEME CONFIGURATION --- */
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E64A19;
+            --primary-light: #FFF7ED;
+            --secondary: #1F2937;
+            --bg-body: #F3F4F6;
+            --bg-card: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #6B7280;
+            --border: #E5E7EB;
+            
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --info: #3B82F6;
+            
+            --nav-width: 260px;
+            --header-height: 70px;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-mode {
+            --bg-body: #111827;
+            --bg-card: #1F2937;
+            --text-main: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --border: #374151;
+            --primary-light: #374151;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background-color: var(--bg-body); color: var(--text-main); height: 100vh; overflow: hidden; transition: background 0.3s; }
+
+        /* --- UTILITIES --- */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .w-full { width: 100%; }
+        .hidden { display: none !important; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .font-bold { font-weight: 700; }
+        .text-primary { color: var(--primary); }
+        .text-danger { color: var(--danger); }
+        .text-success { color: var(--success); }
+        .text-info { color: var(--info); }
+        .text-muted { color: var(--text-muted); }
+        
+        /* Buttons */
+        .btn { padding: 0.6rem 1.2rem; border-radius: var(--radius); border: none; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; justify-content: center; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background: var(--border); }
+        .btn-outline.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: 8px; display:flex; align-items:center; justify-content:center;}
+        .btn-danger { background: #FEE2E2; color: var(--danger); }
+        .btn-danger:hover { background: #FECACA; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+
+        /* Inputs */
+        .input { padding: 0.7rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); color: var(--text-main); width: 100%; transition: 0.2s; }
+        .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1); }
+        
+        /* Cards */
+        .card { background: var(--bg-card); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
+
+        /* --- LAYOUT STRUCTURE --- */
+        .app-layout { display: flex; height: 100vh; }
+
+        /* Sidebar */
+        .sidebar { width: var(--nav-width); background: var(--bg-card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; transition: transform 0.3s; z-index: 50; }
+        .brand { font-size: 1.4rem; font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+        .nav-links { display: flex; flex-direction: column; gap: 0.5rem; flex: 1; overflow-y: auto; }
+        .nav-item { padding: 0.8rem 1rem; border-radius: var(--radius); color: var(--text-muted); cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .nav-item:hover { background: var(--bg-body); color: var(--text-main); }
+        .nav-item.active { background: var(--primary-light); color: var(--primary); font-weight: 700; border-left: 4px solid var(--primary); }
+        .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 1rem; }
+        
+        /* Main Content */
+        .main-content { flex: 1; display: flex; flex-direction: column; background: var(--bg-body); position: relative; overflow: hidden; }
+        .header { height: var(--header-height); background: var(--bg-card); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; }
+        .page-title { font-size: 1.25rem; font-weight: 700; }
+        .header-actions { display: flex; align-items: center; gap: 1rem; }
+        .content-scroll { flex: 1; overflow-y: auto; padding: 2rem; padding-bottom: 130px; }
+
+        /* --- COMPONENT STYLES --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { display: flex; align-items: center; justify-content: space-between; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        
+        /* Tables */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--radius); border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; } 
+        th { text-align: left; padding: 1rem; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid var(--border); white-space: nowrap; background: var(--bg-body); }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; white-space: nowrap; background: var(--bg-card); }
+        tr:last-child td { border-bottom: none; }
+        
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .bg-success { background: #DCFCE7; color: #166534; }
+        .bg-warning { background: #FEF3C7; color: #92400E; }
+        .bg-danger { background: #FEE2E2; color: #991B1B; }
+        .bg-info { background: #E0F2FE; color: #075985; }
+
+        /* POS Layout */
+        .pos-grid { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 1.5rem; height: calc(100vh - 140px); }
+        .pos-left { display: flex; flex-direction: column; gap: 1rem; overflow: hidden; }
+        .pos-right { display: flex; flex-direction: column; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+        .medicine-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 1rem; overflow-y: auto; padding-right: 5px; }
+        .med-item { background: var(--bg-card); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); cursor: pointer; transition: 0.2s; text-align: center; position: relative; }
+        .med-item:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow); }
+        .cart-list { flex: 1; overflow-y: auto; padding: 1rem; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px dashed var(--border); }
+        
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal { background: var(--bg-card); width: 90%; max-width: 600px; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); animation: zoomIn 0.2s; max-height: 90vh; overflow-y: auto; }
+        @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* Toasts */
+        .toast-container { position: fixed; bottom: 80px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: #333; color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); animation: slideIn 0.3s; display: flex; align-items: center; gap: 10px; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* Mobile Nav */
+        .mobile-nav { 
+            display: none; position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: var(--bg-card); border-top: 1px solid var(--border); 
+            padding: 0.8rem 0; justify-content: flex-start; overflow-x: auto; 
+            z-index: 1000; scrollbar-width: none; 
+        }
+        .mobile-nav::-webkit-scrollbar { display: none; }
+        .m-nav-item { 
+            display: flex; flex-direction: column; align-items: center; 
+            font-size: 0.7rem; color: var(--text-muted); gap: 4px; 
+            min-width: 70px; flex-shrink: 0; cursor: pointer;
+        }
+        .m-nav-item.active { color: var(--primary); font-weight: 700; }
+
+        /* View Control */
+        .app-view { display: none; animation: fadeIn 0.3s ease-out; }
+        .app-view.active { display: block; }
+
+        /* Scanner */
+        .scanner-container { width: 100%; height: 250px; background: #000; border-radius: 12px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+        .scan-line { width: 100%; height: 2px; background: #00FF00; position: absolute; top: 0; animation: scan 2s infinite linear; box-shadow: 0 0 10px #00FF00; }
+        @keyframes scan { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        /* Tabs */
+        .tab-group { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1rem; }
+        .tab { padding: 0.8rem 1.2rem; cursor: pointer; color: var(--text-muted); font-weight: 600; border-bottom: 2px solid transparent; transition: 0.2s; }
+        .tab:hover { color: var(--primary); background: var(--bg-body); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); background: transparent; }
+
+        /* Analytics Grid */
+        .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .analytics-card { background: var(--bg-card); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); }
+        .analytics-val { font-size: 1.5rem; font-weight: 800; color: var(--text-main); }
+        .analytics-label { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* NEW: Rx Specific Styles */
+        .rx-thumb { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border); }
+        .rx-pill { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+        .rx-pill-upload { background: #EFF6FF; color: #3B82F6; border: 1px solid #DBEAFE; }
+        .rx-pill-abha { background: #F0FDF4; color: #166534; border: 1px solid #DCFCE7; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); position: fixed; }
+            .main-content { margin-left: 0; width: 100%; }
+            .mobile-nav { display: flex; }
+            .header { padding: 0 1rem; }
+            .pos-grid { grid-template-columns: 1fr; height: auto; }
+            .pos-right { margin-top: 2rem; border-top: 1px solid var(--border); }
+            .content-scroll { padding: 1rem; padding-bottom: 120px; }
+            .stats-grid, .analytics-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 🏠 MAIN APP -->
+    <div class="app-layout" id="appLayout">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fas fa-prescription-bottle-alt text-primary"></i> LifeCord Rx
+            </div>
+            
+            <div class="nav-links">
+                <div class="nav-item active" onclick="nav('dashboard')"><i class="fas fa-th-large"></i> Dashboard</div>
+                <div class="nav-item" onclick="nav('pos')"><i class="fas fa-cash-register"></i> POS & Billing</div>
+                <div class="nav-item" onclick="nav('orders')"><i class="fas fa-shopping-bag"></i> Orders <span class="badge bg-warning" style="margin-left:auto;">5</span></div>
+                <div class="nav-item" onclick="nav('inventory')"><i class="fas fa-boxes"></i> Inventory</div>
+                <div class="nav-item" onclick="nav('suppliers')"><i class="fas fa-truck"></i> Suppliers</div>
+                <div class="nav-item" onclick="nav('customers')"><i class="fas fa-users"></i> Customers</div>
+                <div class="nav-item" onclick="nav('analytics')"><i class="fas fa-chart-line"></i> Analytics</div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="nav-item" onclick="toggleDarkMode()"><i class="fas fa-moon"></i> Dark Mode</div>
+            </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <div class="main-content">
+            <header class="header">
+                <div>
+                    <h2 class="page-title" id="pageTitle">Overview</h2>
+                    <p class="text-sm text-muted">Store ID: #PH-9921 • Online</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline btn-sm" onclick="showToast('Syncing...', 'info')"><i class="fas fa-sync"></i> Sync</button>
+                    <div class="btn btn-icon btn-outline" onclick="openModal('notificationModal')"><i class="fas fa-bell"></i></div>
+                    <div class="btn btn-icon btn-primary" onclick="openModal('profileModal')"><i class="fas fa-user"></i></div>
+                </div>
+            </header>
+
+            <div class="content-scroll">
+
+                <!-- 1. DASHBOARD -->
+                <section id="view-dashboard" class="app-view active">
+                    <div class="stats-grid">
+                        <div class="card stat-card"><div><p class="text-muted text-sm">Today's Sales</p><h2 class="text-primary">₹ 42,500</h2></div><div class="stat-icon bg-success text-success"><i class="fas fa-rupee-sign"></i></div></div>
+                        <div class="card stat-card"><div><p class="text-muted text-sm">Pending Orders</p><h2>12</h2></div><div class="stat-icon bg-warning text-warning"><i class="fas fa-clock"></i></div></div>
+                        <div class="card stat-card"><div><p class="text-muted text-sm">Low Stock</p><h2 class="text-danger">8</h2></div><div class="stat-icon bg-danger text-danger"><i class="fas fa-exclamation-triangle"></i></div></div>
+                        <div class="card stat-card"><div><p class="text-muted text-sm">Active Riders</p><h2 class="text-info">4</h2></div><div class="stat-icon bg-info text-info"><i class="fas fa-motorcycle"></i></div></div>
+                    </div>
+                    <!-- AI Forecast -->
+                    <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--primary);">
+                        <div class="flex items-center gap-2 mb-2"><i class="fas fa-robot text-primary"></i><h3 class="text-sm font-bold uppercase text-primary">AI Forecast Insight</h3></div>
+                        <p class="text-sm">📈 <strong>Flu Season Detected:</strong> Sales of anti-pyretics rose by 15%. Restock <strong>Paracetamol</strong> and <strong>Cough Syrups</strong>.</p>
+                    </div>
+                    <!-- Recent -->
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4"><h3>Recent Transactions</h3><button class="btn btn-sm btn-outline">View All</button></div>
+                        <div class="table-container">
+                            <table class="w-full">
+                                <thead><tr><th>ID</th><th>Customer</th><th>Items</th><th>Amount</th><th>Status</th></tr></thead>
+                                <tbody>
+                                    <tr><td>#TX-992</td><td>Rahul V.</td><td>Dolo, Vit C</td><td>₹ 140</td><td><span class="badge bg-success">Paid</span></td></tr>
+                                    <tr><td>#TX-991</td><td>Priya D.</td><td>Thyronorm</td><td>₹ 210</td><td><span class="badge bg-success">Paid</span></td></tr>
+                                    <tr><td>#TX-990</td><td>Amit K.</td><td>Insulin</td><td>₹ 1200</td><td><span class="badge bg-warning">Pending</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. POS VIEW -->
+                <section id="view-pos" class="app-view">
+                    <div class="pos-grid">
+                        <div class="pos-left">
+                            <div class="card" style="padding: 1rem;">
+                                <div class="flex gap-2">
+                                    <input type="text" id="posSearch" class="input" placeholder="🔍 Search Medicine / Salt / Scan Barcode..." onkeyup="filterInventory()">
+                                    <button class="btn btn-outline" title="Load Prescription" onclick="openModal('prescriptionModal')"><i class="fas fa-file-medical"></i> Load from Rx</button>
+                                </div>
+                            </div>
+                            <div class="medicine-grid" id="posGrid"></div>
+                        </div>
+                        <div class="pos-right">
+                            <div style="padding: 1.5rem; border-bottom: 1px solid var(--border); background: var(--bg-card);">
+                                <h3 style="margin-bottom: 10px;">Current Bill</h3>
+                                <input type="text" id="customerName" class="input" placeholder="Customer Name / Mobile (Optional)">
+                            </div>
+                            <div class="cart-list" id="cartList">
+                                <div style="text-align: center; color: var(--text-muted); margin-top: 50px;"><i class="fas fa-shopping-basket" style="font-size: 2rem; opacity: 0.5;"></i><p>Cart is Empty</p></div>
+                            </div>
+                            <div style="padding: 1.5rem; background: var(--bg-body); border-top: 1px solid var(--border);">
+                                <div class="flex justify-between mb-2 text-sm"><span>Subtotal:</span><span id="subTotal">₹ 0.00</span></div>
+                                <div class="flex justify-between mb-2 text-sm"><span>Discount (5%):</span><span class="text-danger" id="discountVal">- ₹ 0.00</span></div>
+                                <div class="flex justify-between mb-2 text-sm"><span>GST (18%):</span><span id="gstVal">₹ 0.00</span></div>
+                                <div class="flex justify-between mb-4" style="font-size: 1.25rem; font-weight: 800;"><span>Total:</span><span id="grandTotal" class="text-primary">₹ 0.00</span></div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-outline w-full" onclick="clearCart()">Clear</button>
+                                    <button class="btn btn-primary w-full" onclick="generateInvoice()">Checkout <i class="fas fa-arrow-right"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. INVENTORY VIEW -->
+                <section id="view-inventory" class="app-view">
+                    <div class="card h-full">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="flex gap-2">
+                                <input type="text" id="invSearch" class="input" placeholder="Search stock..." style="width: 250px;" onkeyup="renderInventory()">
+                                <button class="btn btn-outline" onclick="openModal('stockScanModal')"><i class="fas fa-qrcode"></i> Scan Stock</button>
+                            </div>
+                            <button class="btn btn-primary" onclick="openAddMedModal()"><i class="fas fa-plus"></i> Add Medicine</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="w-full">
+                                <thead><tr><th>Medicine Name</th><th>Batch No.</th><th>Expiry</th><th>Stock</th><th>MRP</th><th>Action</th></tr></thead>
+                                <tbody id="inventoryTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. ORDERS VIEW -->
+                <section id="view-orders" class="app-view">
+                    <div class="card">
+                        <div class="flex gap-4 mb-4" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                            <button class="btn btn-sm btn-outline active" onclick="filterOrderList('All', this)">All</button>
+                            <button class="btn btn-sm btn-outline" onclick="filterOrderList('New', this)">New</button>
+                            <button class="btn btn-sm btn-outline" onclick="filterOrderList('Processing', this)">Processing</button>
+                            <button class="btn btn-sm btn-outline" onclick="filterOrderList('Dispatched', this)">Dispatched</button>
+                        </div>
+                        <div class="flex flex-col gap-4" id="orderFeed"></div>
+                    </div>
+                </section>
+
+                <!-- 5. SUPPLIERS VIEW -->
+                <section id="view-suppliers" class="app-view">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4"><h3>Supplier Management</h3><button class="btn btn-primary" onclick="openModal('addSupplierModal')"><i class="fas fa-plus"></i> Add Supplier</button></div>
+                        <div class="table-container">
+                            <table class="w-full"><thead><tr><th>Name</th><th>Contact</th><th>GST No.</th><th>Outstanding</th><th>Last Order</th><th>Action</th></tr></thead>
+                            <tbody id="supplierTable"></tbody></table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. CUSTOMERS VIEW -->
+                <section id="view-customers" class="app-view">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-4"><h3>Customer Database</h3><input type="text" class="input" placeholder="Search Customer..." style="width: 250px;"></div>
+                        <div class="table-container">
+                            <table class="w-full">
+                                <thead><tr><th>Name</th><th>Phone</th><th>Visits</th><th>Total Spend</th><th>Last Visit</th><th>Action</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Rahul Verma</td><td>9876543210</td><td>12</td><td>₹ 4,500</td><td>Yesterday</td><td><button class="btn btn-sm btn-outline">History</button></td></tr>
+                                    <tr><td>Priya Das</td><td>9876543211</td><td>5</td><td>₹ 1,200</td><td>1 week ago</td><td><button class="btn btn-sm btn-outline">History</button></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. ANALYTICS VIEW -->
+                <section id="view-analytics" class="app-view">
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <p class="analytics-label">Total Revenue (Monthly)</p><h2 class="analytics-val text-primary">₹ 4,50,200</h2><p class="text-xs text-success">▲ 12% vs last month</p>
+                        </div>
+                        <div class="analytics-card">
+                            <p class="analytics-label">Net Profit</p><h2 class="analytics-val text-success">₹ 1,20,500</h2><p class="text-xs text-success">▲ 8% margin maintained</p>
+                        </div>
+                        <div class="analytics-card">
+                            <p class="analytics-label">Total Expense</p><h2 class="analytics-val text-danger">₹ 3,29,700</h2><p class="text-xs text-danger">Stock purchases & salaries</p>
+                        </div>
+                        <div class="analytics-card">
+                            <p class="analytics-label">Average Order Value</p><h2 class="analytics-val text-info">₹ 450</h2><p class="text-xs text-muted">Based on 1000 orders</p>
+                        </div>
+                    </div>
+                    <div class="card"><h3>Weekly Revenue Trend</h3><canvas id="salesChart" height="300"></canvas></div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE NAV -->
+    <div class="mobile-nav">
+        <div class="m-nav-item active" onclick="nav('dashboard')"><i class="fas fa-home"></i> Home</div>
+        <div class="m-nav-item" onclick="nav('pos')"><i class="fas fa-calculator"></i> POS</div>
+        <div class="m-nav-item" onclick="nav('orders')"><i class="fas fa-box"></i> Orders</div>
+        <div class="m-nav-item" onclick="nav('inventory')"><i class="fas fa-list"></i> Stock</div>
+        <div class="m-nav-item" onclick="nav('suppliers')"><i class="fas fa-truck"></i> Supply</div>
+        <div class="m-nav-item" onclick="nav('customers')"><i class="fas fa-users"></i> Users</div>
+        <div class="m-nav-item" onclick="nav('analytics')"><i class="fas fa-chart-line"></i> Stats</div>
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Detailed Prescription View Modal -->
+    <div id="viewRxModal" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4"><h3>Prescription Details</h3><i class="fas fa-times cursor-pointer" onclick="closeModal('viewRxModal')"></i></div>
+            
+            <div id="rxModalContent">
+                <!-- Dynamic Content Injected Here -->
+            </div>
+            
+            <button class="btn btn-primary w-full mt-4" onclick="closeModal('viewRxModal')">Close</button>
+        </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4"><h3>Notifications</h3><i class="fas fa-times cursor-pointer" onclick="closeModal('notificationModal')"></i></div>
+            <div class="flex flex-col gap-3">
+                <div class="card flex justify-between p-2"><div><strong>Low Stock Alert</strong><p class="text-xs">Dolo 650 is below 20 units.</p></div><span class="text-xs text-muted">2m ago</span></div>
+                <div class="card flex justify-between p-2"><div><strong>New Order</strong><p class="text-xs">Order #ORD-101 received.</p></div><span class="text-xs text-muted">15m ago</span></div>
+                <div class="card flex justify-between p-2"><div><strong>Payment Received</strong><p class="text-xs">₹ 1200 from Amit K.</p></div><span class="text-xs text-muted">1h ago</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Medicine -->
+    <div id="addMedModal" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4"><h3 id="medModalTitle">Add New Medicine</h3><i class="fas fa-times cursor-pointer" onclick="closeModal('addMedModal')"></i></div>
+            <div class="flex flex-col gap-4">
+                <input type="hidden" id="medId">
+                <input type="text" id="medName" class="input" placeholder="Medicine Name">
+                <div class="flex gap-4"><input type="text" id="medBatch" class="input" placeholder="Batch No."><input type="date" id="medExpiry" class="input"></div>
+                <div class="flex gap-4"><input type="number" id="medStock" class="input" placeholder="Stock Qty"><input type="number" id="medMrp" class="input" placeholder="MRP"></div>
+                <button class="btn btn-primary w-full" onclick="saveMedicine()">Save to Inventory</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Supplier -->
+    <div id="addSupplierModal" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4"><h3>Add Supplier</h3><i class="fas fa-times cursor-pointer" onclick="closeModal('addSupplierModal')"></i></div>
+            <div class="flex flex-col gap-4">
+                <input type="text" id="supName" class="input" placeholder="Supplier Name">
+                <input type="text" id="supContact" class="input" placeholder="Contact Number">
+                <input type="text" id="supGst" class="input" placeholder="GST Number">
+                <button class="btn btn-primary w-full" onclick="saveSupplier()">Save Supplier</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prescription Upload / ABHA Modal -->
+    <div id="prescriptionModal" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4"><h3>Load Prescription</h3><i class="fas fa-times cursor-pointer" onclick="closeModal('prescriptionModal')"></i></div>
+            <div class="tab-group">
+                <div class="tab active" onclick="switchRxTab('upload', this)">Upload Image</div>
+                <div class="tab" onclick="switchRxTab('abha', this)">ABHA Access</div>
+            </div>
+            
+            <div id="rx-upload-tab">
+                <div style="border: 2px dashed var(--border); padding: 2rem; text-align: center; border-radius: var(--radius); cursor: pointer;" onclick="simulateOCR()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--text-muted);"></i>
+                    <p class="text-sm text-muted mt-2">Click to Upload Prescription</p>
+                </div>
+                <!-- Enhanced OCR UI -->
+                <div id="ocr-results" class="hidden" style="margin-top: 1rem;">
+                    <div class="card" style="border: 1px solid var(--success); padding: 1rem; background: #F0FDF4;">
+                        <p class="text-sm font-bold text-success mb-2"><i class="fas fa-check"></i> 3 Medicines Detected:</p>
+                        <div class="flex justify-between items-center text-sm border-bottom p-2" style="border-bottom: 1px dashed var(--border);">
+                            <span><strong>Dolo 650</strong> (1 Strip)</span>
+                            <button class="btn btn-sm btn-outline" onclick="addToCart(1)">Add</button>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-bottom p-2" style="border-bottom: 1px dashed var(--border);">
+                            <span><strong>Azithral 500</strong> (1 Strip)</span>
+                            <button class="btn btn-sm btn-outline" onclick="addToCart(6)">Add</button>
+                        </div>
+                        <div class="flex justify-between items-center text-sm p-2">
+                            <span><strong>Pan 40</strong> (1 Strip)</span>
+                            <button class="btn btn-sm btn-outline" onclick="addToCart(3)">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="rx-abha-tab" class="hidden">
+                <input type="text" class="input mb-4" placeholder="Enter Patient ABHA ID">
+                <button class="btn btn-primary w-full" onclick="simulateABHA()">Fetch Prescription</button>
+                <div id="abha-results" class="hidden" style="margin-top: 1rem;">
+                    <!-- Enhanced ABHA Card UI -->
+                    <div class="card" style="border-left: 4px solid var(--info); padding: 1rem;">
+                        <div class="flex justify-between">
+                            <strong><i class="fas fa-user-shield"></i> Verified Access</strong>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <p class="text-sm text-muted mt-2">Dr. Sharma prescribed:</p>
+                        <ul class="text-sm mt-1 mb-2" style="padding-left: 1.2rem;">
+                            <li>Azithral 500mg x 1</li>
+                            <li>Limcee 500mg x 1</li>
+                        </ul>
+                        <button class="btn btn-sm btn-primary w-full" onclick="addToCart(6); addToCart(11);">Add All to Bill</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Scan Modal -->
+    <div id="stockScanModal" class="modal-overlay">
+        <div class="modal" style="text-align: center;">
+            <div class="flex justify-between items-center mb-4"><h3>Scan Medicine QR</h3><i class="fas fa-times cursor-pointer" onclick="closeModal('stockScanModal')"></i></div>
+            <div class="scanner-container"><div style="color: rgba(255,255,255,0.7); z-index: 10;">[ Scanning Simulation... ]</div><div class="scan-line"></div></div>
+            <p class="text-sm text-muted mb-4">Point camera at medicine barcode/QR to auto-read details.</p>
+            <button class="btn btn-primary w-full" onclick="simulateStockScan()">Simulate Scan</button>
+        </div>
+    </div>
+
+    <!-- Profile/Settings -->
+    <div id="profileModal" class="modal-overlay">
+        <div class="modal">
+            <div class="flex justify-between items-center mb-4"><h3>Settings</h3><i class="fas fa-times cursor-pointer" onclick="closeModal('profileModal')"></i></div>
+            <div class="flex flex-col gap-4">
+                <label class="text-sm font-bold">Store Name</label><input type="text" class="input" value="GreenCross Pharmacy">
+                <label class="text-sm font-bold">Printer Config</label><select class="input"><option>Thermal 80mm</option><option>Laser A4</option></select>
+                <button class="btn btn-primary w-full" onclick="closeModal('profileModal'); showToast('Settings Saved', 'success')">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice Success -->
+    <div id="invoiceModal" class="modal-overlay">
+        <div class="modal" style="text-align: center;">
+            <div style="font-size: 3rem; color: var(--success); margin-bottom: 1rem;"><i class="fas fa-check-circle"></i></div>
+            <h2>Payment Successful!</h2>
+            <p class="text-muted mb-4">Invoice generated successfully.</p>
+            <div class="background: var(--bg-body); padding: 1rem; border-radius: var(--radius); text-align: left; margin-bottom: 1.5rem;">
+                <div class="flex justify-between mb-2"><span>Total Amount:</span><strong id="modalTotal">₹ 0.00</strong></div>
+                <div class="flex justify-between"><span>Payment:</span><span>Cash</span></div>
+            </div>
+            <div class="flex gap-2"><button class="btn btn-outline w-full" onclick="closeModal('invoiceModal')">Close</button><button class="btn btn-primary w-full" onclick="window.print()"><i class="fas fa-print"></i> Print</button></div>
+        </div>
+    </div>
+
+    <!-- Hidden Invoice Template -->
+    <div id="invoice-template" style="display:none; padding: 20px; font-family: 'Inter', sans-serif;">
+        <div style="text-align: center; margin-bottom: 20px;"><h2 style="color: #FF6B35; margin:0;">GreenCross Pharmacy</h2><p style="color: #666; font-size: 0.8rem; margin:5px 0;">Indiranagar, Bangalore • GSTIN: 29AAAAA0000A1Z5</p><h3 style="margin-top:10px;">Tax Invoice</h3></div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 0.9rem;"><div><strong>Bill To:</strong> <span id="invCust">Walk-in</span></div><div><strong>Invoice #:</strong> <span id="invId">INV-001</span><br><strong>Date:</strong> <span id="invDate"></span></div></div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 0.9rem;"><thead><tr style="background: #eee;"><th style="border:1px solid #ddd; padding:8px;">Item</th><th style="border:1px solid #ddd; padding:8px;">Qty</th><th style="border:1px solid #ddd; padding:8px;">Price</th><th style="border:1px solid #ddd; padding:8px;">Total</th></tr></thead><tbody id="invBody"></tbody></table>
+        <div style="text-align: right; font-size: 1rem;"><p>Subtotal: <span id="invSub"></span></p><p>GST (18%): <span id="invGst"></span></p><h3>Total: <span id="invTotal"></span></h3></div>
+        <div style="margin-top: 30px; text-align: center; font-size: 0.8rem; color: #888;">Thank you for your business!</div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        // --- DATA ---
+        let INVENTORY = [
+            { id: 1, name: "Dolo 650mg", batch: "B-221", expiry: "2025-12-01", stock: 500, mrp: 30 },
+            { id: 2, name: "Augmentin 625", batch: "A-992", expiry: "2024-08-15", stock: 45, mrp: 240 },
+            { id: 3, name: "Pan 40", batch: "P-110", expiry: "2026-01-20", stock: 300, mrp: 110 },
+            { id: 4, name: "Thyronorm 50", batch: "T-001", expiry: "2025-06-10", stock: 12, mrp: 180 },
+            { id: 5, name: "Shelcal 500", batch: "S-552", expiry: "2024-05-01", stock: 80, mrp: 95 },
+            { id: 6, name: "Azithral 500", batch: "Z-221", expiry: "2025-09-09", stock: 150, mrp: 120 },
+            { id: 7, name: "Caldikind Plus", batch: "C-101", expiry: "2025-11-20", stock: 200, mrp: 110 },
+            { id: 8, name: "Ascoril LS", batch: "A-552", expiry: "2024-12-12", stock: 60, mrp: 135 },
+            { id: 9, name: "Becosules", batch: "B-331", expiry: "2026-02-15", stock: 400, mrp: 45 },
+            { id: 10, name: "Neurobion Forte", batch: "N-220", expiry: "2025-08-30", stock: 250, mrp: 38 },
+            { id: 11, name: "Limcee 500", batch: "L-998", expiry: "2025-07-20", stock: 600, mrp: 25 },
+            { id: 12, name: "Montair LC", batch: "M-112", expiry: "2025-05-15", stock: 90, mrp: 190 },
+            { id: 13, name: "Allegra 120", batch: "A-443", expiry: "2025-10-10", stock: 75, mrp: 210 },
+            { id: 14, name: "Telma 40", batch: "T-221", expiry: "2026-03-05", stock: 320, mrp: 240 },
+            { id: 15, name: "Glycomet GP1", batch: "G-882", expiry: "2025-09-18", stock: 180, mrp: 115 }
+        ];
+
+        let CART = [];
+        
+        // ORDERS with prescription links
+        let ORDERS = [
+            { id: "ORD-101", customer: "Vikram Singh", items: "Dolo x2, Vit C x1", status: "New", time: "2m ago", rxType: "upload", rxSource: "https://placehold.co/400x600?text=Rx+Upload", doctor: "Dr. A. Gupta", date: "24 Nov 2025" },
+            { id: "ORD-102", customer: "Priya Das", items: "Thyronorm x1", status: "Processing", time: "15m ago", rxType: "abha", rxSource: "ABHA: 91-8822-7711", doctor: "Dr. S. Sharma", date: "23 Nov 2025" },
+            { id: "ORD-103", customer: "Amit Kumar", items: "Digene x1", status: "Ready", time: "40m ago", rxType: "upload", rxSource: "https://placehold.co/400x600?text=Prescription+Scan", doctor: "Dr. R. Verma", date: "24 Nov 2025" },
+            { id: "ORD-104", customer: "Sneha Gupta", items: "Shelcal x1", status: "New", time: "1h ago", rxType: "abha", rxSource: "ABHA: 12-3456-7890", doctor: "Dr. K. Menon", date: "24 Nov 2025" },
+            { id: "ORD-105", customer: "Rajesh K.", items: "Allegra x1", status: "Dispatched", time: "2h ago", rxType: "upload", rxSource: "https://placehold.co/400x600?text=Rx+Image", doctor: "Dr. P. Jain", date: "23 Nov 2025" },
+            { id: "ORD-106", customer: "Penny H.", items: "Bandages x5", status: "New", time: "3h ago", rxType: "upload", rxSource: "https://placehold.co/400x600?text=Rx+Slip", doctor: "Dr. L. Hofstadter", date: "24 Nov 2025" },
+            { id: "ORD-107", customer: "Sheldon C.", items: "Sanitizer", status: "Ready", time: "4h ago", rxType: "abha", rxSource: "ABHA: 99-8877-6655", doctor: "Dr. B. Fowler", date: "22 Nov 2025" }
+        ];
+
+        let SUPPLIERS = [
+            { id: 1, name: "Sun Pharma Dist.", contact: "+91 98765 43210", gst: "29ABCDE1234F1Z5", outstanding: 12000, last: "2 Days ago" },
+            { id: 2, name: "Global Medico", contact: "+91 99887 77665", gst: "29XYZZZ1234F1Z5", outstanding: 0, last: "10 Days ago" },
+            { id: 3, name: "City Care Supplies", contact: "+91 88776 66554", gst: "29PQRS1234F1Z5", outstanding: 4500, last: "Yesterday" },
+            { id: 4, name: "Apex Pharma", contact: "+91 77665 55443", gst: "29LMNO1234F1Z5", outstanding: 25000, last: "1 Week ago" },
+            { id: 5, name: "Metro Distributors", contact: "+91 66554 44332", gst: "29JKLM1234F1Z5", outstanding: 8000, last: "3 Days ago" }
+        ];
+
+        let currentOrderFilter = 'All';
+
+        // --- CORE ---
+        function initApp() { renderPOSGrid(); renderInventory(); renderOrders(); renderSuppliers(); renderCharts(); showToast("System Ready", "info"); }
+        
+        function nav(view) {
+            document.querySelectorAll('.app-view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + view).classList.add('active');
+            
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick').includes(view));
+            if(activeNav) activeNav.classList.add('active');
+            
+            document.querySelectorAll('.m-nav-item').forEach(el => el.classList.remove('active'));
+            const mobileNav = Array.from(document.querySelectorAll('.m-nav-item')).find(el => el.getAttribute('onclick').includes(view));
+            if(mobileNav) mobileNav.classList.add('active');
+
+            document.getElementById('pageTitle').innerText = view.charAt(0).toUpperCase() + view.slice(1);
+        }
+
+        // --- INVENTORY CRUD ---
+        function renderInventory() {
+            const tbody = document.getElementById('inventoryTable');
+            const term = document.getElementById('invSearch').value.toLowerCase();
+            tbody.innerHTML = INVENTORY.filter(i => i.name.toLowerCase().includes(term)).map(item => `
+                <tr>
+                    <td class="font-bold">${item.name}</td>
+                    <td>${item.batch}</td>
+                    <td>${item.expiry}</td>
+                    <td>${item.stock < 20 ? `<span class="badge bg-danger">Low (${item.stock})</span>` : item.stock}</td>
+                    <td>₹${item.mrp}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline" onclick="openEditMedModal(${item.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-outline text-danger" onclick="deleteMed(${item.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddMedModal() {
+            document.getElementById('medModalTitle').innerText = "Add New Medicine";
+            document.getElementById('medId').value = "";
+            document.getElementById('medName').value = "";
+            document.getElementById('medBatch').value = "";
+            document.getElementById('medExpiry').value = "";
+            document.getElementById('medStock').value = "";
+            document.getElementById('medMrp').value = "";
+            openModal('addMedModal');
+        }
+
+        function openEditMedModal(id) {
+            const item = INVENTORY.find(i => i.id === id);
+            document.getElementById('medModalTitle').innerText = "Edit Medicine";
+            document.getElementById('medId').value = item.id;
+            document.getElementById('medName').value = item.name;
+            document.getElementById('medBatch').value = item.batch;
+            document.getElementById('medExpiry').value = item.expiry;
+            document.getElementById('medStock').value = item.stock;
+            document.getElementById('medMrp').value = item.mrp;
+            openModal('addMedModal');
+        }
+
+        function saveMedicine() {
+            const id = document.getElementById('medId').value;
+            const name = document.getElementById('medName').value;
+            const batch = document.getElementById('medBatch').value;
+            const expiry = document.getElementById('medExpiry').value;
+            const stock = parseInt(document.getElementById('medStock').value);
+            const mrp = parseInt(document.getElementById('medMrp').value);
+
+            if(!name || !stock || !mrp) return showToast("Please fill details", "warning");
+
+            if(id) {
+                const idx = INVENTORY.findIndex(i => i.id == id);
+                INVENTORY[idx] = { id: parseInt(id), name, batch, expiry, stock, mrp };
+                showToast("Medicine Updated", "success");
+            } else {
+                const newId = INVENTORY.length > 0 ? Math.max(...INVENTORY.map(i => i.id)) + 1 : 1;
+                INVENTORY.push({ id: newId, name, batch, expiry, stock, mrp });
+                showToast("Medicine Added", "success");
+            }
+            closeModal('addMedModal');
+            renderInventory();
+            renderPOSGrid();
+        }
+
+        function deleteMed(id) {
+            if(confirm("Are you sure?")) {
+                const idx = INVENTORY.findIndex(i => i.id === id);
+                INVENTORY.splice(idx, 1);
+                renderInventory();
+                renderPOSGrid();
+                showToast("Item Deleted", "success");
+            }
+        }
+
+        // --- SUPPLIERS ---
+        function renderSuppliers() {
+            const tbody = document.getElementById('supplierTable');
+            tbody.innerHTML = SUPPLIERS.map(s => `
+                <tr>
+                    <td class="font-bold">${s.name}</td>
+                    <td>${s.contact}</td>
+                    <td>${s.gst}</td>
+                    <td class="${s.outstanding > 0 ? 'text-danger' : 'text-success'}">₹ ${s.outstanding}</td>
+                    <td>${s.last}</td>
+                    <td class="flex gap-2">
+                        <button class="btn btn-sm btn-outline" onclick="paySupplier(${s.id})">Pay</button>
+                        <button class="btn btn-sm btn-primary" onclick="orderSupplier(${s.id})">Order</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function saveSupplier() {
+            const name = document.getElementById('supName').value;
+            const contact = document.getElementById('supContact').value;
+            const gst = document.getElementById('supGst').value;
+            
+            if(!name) return showToast("Enter Supplier Name", "warning");
+            
+            SUPPLIERS.push({ id: Date.now(), name, contact, gst, outstanding: 0, last: "Never" });
+            renderSuppliers();
+            closeModal('addSupplierModal');
+            showToast("Supplier Added!", "success");
+        }
+
+        function paySupplier(id) {
+            const s = SUPPLIERS.find(x => x.id === id);
+            if(s.outstanding <= 0) return showToast("No outstanding balance!", "success");
+            const amt = prompt(`Pay outstanding ₹${s.outstanding} for ${s.name}? Enter amount:`, s.outstanding);
+            if(amt) {
+                s.outstanding -= parseInt(amt);
+                renderSuppliers();
+                showToast(`Paid ₹${amt} successfully!`, "success");
+            }
+        }
+
+        function orderSupplier(id) {
+            const s = SUPPLIERS.find(x => x.id === id);
+            alert(`Opening Purchase Order for ${s.name}...\n(Simulated Email Sent)`);
+            showToast("Purchase Order Created", "info");
+        }
+
+        // --- QR STOCK SCANNER ---
+        function simulateStockScan() {
+            showToast("Scanning...", "info");
+            setTimeout(() => {
+                closeModal('stockScanModal');
+                const scannedName = "Dolo 650mg"; 
+                const existing = INVENTORY.find(i => i.name === scannedName);
+                if(existing) {
+                    alert(`✅ Medicine Found: ${existing.name}\nCurrent Stock: ${existing.stock}\nBatch: ${existing.batch}`);
+                } else {
+                    if(confirm("New Medicine Detected! Add to inventory?")) {
+                        openAddMedModal();
+                        document.getElementById('medName').value = "New Scanned Med";
+                    }
+                }
+            }, 1500);
+        }
+
+        // --- POS & INVOICE ---
+        function renderPOSGrid(filter = "") {
+            const grid = document.getElementById('posGrid');
+            grid.innerHTML = INVENTORY.filter(i => i.name.toLowerCase().includes(filter.toLowerCase())).map(item => `
+                <div class="med-item" onclick="addToCart(${item.id})">
+                    <div style="font-weight:600; margin-bottom:4px;">${item.name}</div>
+                    <div class="text-sm text-muted">Stock: ${item.stock}</div>
+                    <div class="font-bold text-primary">₹${item.mrp}</div>
+                </div>
+            `).join('');
+        }
+
+        function addToCart(id) {
+            const item = INVENTORY.find(i => i.id === id);
+            const exist = CART.find(c => c.id === id);
+            if(exist) exist.qty++; else CART.push({ ...item, qty: 1 });
+            renderCart();
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cartList');
+            if(CART.length === 0) { list.innerHTML = `<div style="text-align: center; color: var(--text-muted); margin-top: 50px;"><i class="fas fa-shopping-basket" style="font-size: 2rem; opacity: 0.5;"></i><p>Cart is Empty</p></div>`; updateTotals(0); return; }
+            list.innerHTML = CART.map((item, idx) => `
+                <div class="cart-item">
+                    <div><div class="font-bold">${item.name}</div><div class="text-sm text-muted">₹${item.mrp}</div></div>
+                    <div class="flex items-center gap-2">
+                        <button class="btn btn-icon btn-sm btn-outline" onclick="changeQty(${idx}, -1)">-</button><span>${item.qty}</span><button class="btn btn-icon btn-sm btn-outline" onclick="changeQty(${idx}, 1)">+</button>
+                        <button class="btn btn-icon btn-sm btn-danger" onclick="removeItem(${idx})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            updateTotals(CART.reduce((acc, item) => acc + (item.mrp * item.qty), 0));
+        }
+
+        function changeQty(idx, delta) {
+            CART[idx].qty += delta;
+            if(CART[idx].qty <= 0) {
+                if(confirm("Remove item from cart?")) CART.splice(idx, 1);
+                else CART[idx].qty = 1;
+            }
+            renderCart();
+        }
+
+        function removeItem(idx) {
+            CART.splice(idx, 1);
+            renderCart();
+        }
+
+        function updateTotals(sub) {
+            const discount = sub * 0.05;
+            const gst = (sub - discount) * 0.18;
+            const total = sub - discount + gst;
+            
+            document.getElementById('subTotal').innerText = `₹ ${sub.toFixed(2)}`;
+            document.getElementById('discountVal').innerText = `- ₹ ${discount.toFixed(2)}`;
+            document.getElementById('gstVal').innerText = `₹ ${gst.toFixed(2)}`;
+            document.getElementById('grandTotal').innerText = `₹ ${total.toFixed(2)}`;
+            document.getElementById('modalTotal').innerText = `₹ ${total.toFixed(2)}`;
+        }
+
+        function generateInvoice() {
+            if(CART.length === 0) return showToast("Cart is empty", "warning");
+            
+            // Populate hidden Invoice Template
+            document.getElementById('invCust').innerText = document.getElementById('customerName').value || "Walk-in";
+            document.getElementById('invId').innerText = "INV-" + Date.now().toString().slice(-6);
+            document.getElementById('invDate').innerText = new Date().toLocaleDateString();
+            
+            const tbody = document.getElementById('invBody');
+            tbody.innerHTML = CART.map(i => `<tr>
+                <td style="border:1px solid #ddd; padding:8px;">${i.name}</td>
+                <td style="border:1px solid #ddd; padding:8px;">${i.qty}</td>
+                <td style="border:1px solid #ddd; padding:8px;">${i.mrp}</td>
+                <td style="border:1px solid #ddd; padding:8px;">${i.mrp * i.qty}</td>
+            </tr>`).join('');
+
+            const sub = CART.reduce((acc, item) => acc + (item.mrp * item.qty), 0);
+            const gst = (sub * 0.95) * 0.18;
+            const total = (sub * 0.95) + gst;
+
+            document.getElementById('invSub').innerText = `₹ ${sub.toFixed(2)}`;
+            document.getElementById('invGst').innerText = `₹ ${gst.toFixed(2)}`;
+            document.getElementById('invTotal').innerText = `₹ ${total.toFixed(2)}`;
+
+            // Generate PDF
+            const element = document.getElementById('invoice-template');
+            element.style.display = 'block';
+            html2pdf().from(element).save().then(() => {
+                element.style.display = 'none';
+                showToast("Invoice Downloaded!", "success");
+                CART = [];
+                renderCart();
+            });
+        }
+
+        function clearCart() { CART = []; renderCart(); }
+
+        // --- PRESCRIPTION HANDLING ---
+        function switchRxTab(tab, el) {
+            document.getElementById('rx-upload-tab').classList.add('hidden');
+            document.getElementById('rx-abha-tab').classList.add('hidden');
+            document.getElementById(`rx-${tab}-tab`).classList.remove('hidden');
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        function simulateOCR() {
+            showToast("Analyzing Prescription...", "info");
+            setTimeout(() => {
+                document.getElementById('ocr-results').classList.remove('hidden');
+            }, 1500);
+        }
+
+        function simulateABHA() {
+            document.getElementById('abha-results').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('abha-results').innerHTML = `
+                    <div class="card" style="border-left: 4px solid var(--info); padding: 1rem;">
+                        <div class="flex justify-between">
+                            <strong><i class="fas fa-user-shield"></i> Verified Access</strong>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        <p class="text-sm text-muted mt-2">Dr. Sharma prescribed:</p>
+                        <ul class="text-sm mt-1 mb-2" style="padding-left: 1.2rem;">
+                            <li>Azithral 500mg x 1</li>
+                            <li>Limcee 500mg x 1</li>
+                        </ul>
+                        <button class="btn btn-sm btn-primary w-full" onclick="addToCart(6); addToCart(11);">Add All to Bill</button>
+                    </div>`;
+            }, 2000);
+        }
+
+        // --- UTILS ---
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function showToast(msg, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.borderLeft = `4px solid var(--${type})`;
+            toast.innerHTML = msg;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+        function filterInventory() { renderPOSGrid(document.getElementById('posSearch').value); }
+
+        function filterOrderList(status, btnElement) {
+            currentOrderFilter = status;
+            const buttons = btnElement.parentElement.querySelectorAll('.btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            buttons.forEach(b => b.classList.remove('btn-primary'));
+            buttons.forEach(b => b.classList.add('btn-outline'));
+            
+            btnElement.classList.remove('btn-outline');
+            btnElement.classList.add('btn-primary');
+            btnElement.classList.add('active');
+
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const feed = document.getElementById('orderFeed');
+            let filteredOrders = ORDERS;
+            
+            if (currentOrderFilter !== 'All') {
+                filteredOrders = ORDERS.filter(o => o.status === currentOrderFilter);
+            }
+
+            if (filteredOrders.length === 0) {
+                feed.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-muted);">No orders found</div>`;
+                return;
+            }
+
+            feed.innerHTML = filteredOrders.map(o => `
+                <div class="card flex justify-between items-center" style="padding: 1rem;">
+                    <div>
+                        <div class="font-bold">${o.id}</div>
+                        <div class="text-sm flex items-center gap-2">
+                            <span title="View Rx" class="text-primary" style="cursor:pointer; font-size:1.2rem;" onclick="viewPrescription('${o.id}')">
+                                ${o.rxType === 'upload' ? '<i class="fas fa-camera text-info"></i>' : '<i class="fas fa-shield-alt text-success"></i>'}
+                            </span>
+                            ${o.rxType === 'upload' ? 
+                                `<img src="${o.rxSource}" class="rx-thumb" onclick="viewPrescription('${o.id}')">` : 
+                                `<span class="rx-pill rx-pill-abha">ABHA Linked</span>`
+                            }
+                            <span>${o.customer} • ${o.items}</span>
+                        </div>
+                        <div class="rx-pill ${o.rxType === 'upload' ? 'rx-pill-upload' : 'rx-pill-abha'}">
+                            Rx: ${o.rxType === 'upload' ? 'Image' : 'ABHA'}
+                        </div>
+                    </div>
+                    <span class="badge bg-${o.status === 'New' ? 'info' : (o.status === 'Processing' ? 'warning' : 'success')}">${o.status}</span>
+                </div>
+            `).join('');
+        }
+
+        function viewPrescription(id) {
+            const order = ORDERS.find(o => o.id === id);
+            const content = document.getElementById('rxModalContent');
+            
+            if(order) {
+                let displayContent = '';
+                
+                if(order.rxType === 'upload') {
+                    displayContent = `
+                        <div class="card" style="text-align:center; margin-bottom:1rem;">
+                            <img src="${order.rxSource}" style="max-width:100%; border-radius:8px;">
+                        </div>
+                    `;
+                } else {
+                    displayContent = `
+                        <div class="card" style="border-left:4px solid var(--success); padding:1.5rem; background:#F0FDF4;">
+                            <h3 class="text-success"><i class="fas fa-shield-alt"></i> ABHA Verified</h3>
+                            <p class="text-sm text-muted mt-2"><strong>ABHA ID:</strong> ${order.rxSource.replace('ABHA: ', '')}</p>
+                            <p class="text-sm text-muted"><strong>Status:</strong> <span class="badge bg-success">Linked</span></p>
+                        </div>
+                    `;
+                }
+
+                content.innerHTML = `
+                    <div class="flex justify-between mb-4">
+                        <div>
+                            <p class="text-sm text-muted">Patient</p>
+                            <p class="font-bold">${order.customer}</p>
+                        </div>
+                        <div style="text-align:right;">
+                            <p class="text-sm text-muted">Prescribed By</p>
+                            <p class="font-bold">${order.doctor}</p>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-sm text-muted">Date</p>
+                        <p class="font-bold">${order.date}</p>
+                    </div>
+                    ${displayContent}
+                    <div class="mt-4">
+                        <p class="text-sm font-bold mb-2">Medicines:</p>
+                        <div class="card" style="padding:10px; background:#F9FAFB;">
+                            <p class="text-sm">${order.items}</p>
+                        </div>
+                    </div>
+                `;
+                
+                openModal('viewRxModal');
+            }
+        }
+
+        function renderCharts() {
+            new Chart(document.getElementById('salesChart'), {
+                type: 'line', data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ label: 'Revenue', data: [12000,19000,15000,22000,24000,30000,42000], borderColor: '#FF6B35', tension: 0.3, fill:true, backgroundColor:'rgba(255, 107, 53, 0.1)' }] }, options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+            });
+        }
+
+        // Init
+        initApp();
+        window.onclick = function(e) { if(e.target.classList.contains('modal-overlay')) e.target.style.display = 'none'; }
+    </script>
+</body>
+</html>

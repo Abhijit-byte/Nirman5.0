@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeCord - Secure Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- THEME VARIABLES (Matching Homepage) --- */
+        :root {
+            --gradient-primary: linear-gradient(135deg, #3A7BFF 0%, #60A5FA 100%);
+            --primary-color: #3A7BFF;
+            --primary-dark: #2563EB;
+            --primary-light: #EBF3FF;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #0F172A;
+            --text-muted: #64748B;
+            --radius: 24px;
+            --shadow-soft: 0 10px 40px -10px rgba(0,0,0,0.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background Decoration */
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+        }
+        .shape-1 { top: -10%; left: -10%; width: 400px; height: 400px; background: rgba(58, 123, 255, 0.15); }
+        .shape-2 { bottom: -10%; right: -10%; width: 300px; height: 300px; background: rgba(96, 165, 250, 0.15); }
+
+        /* --- PAYMENT BOX --- */
+        .payment-box {
+            background: var(--card-bg);
+            padding: 50px 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-soft);
+            width: 90%;
+            max-width: 480px;
+            text-align: center;
+            position: relative;
+            border: 1px solid white;
+            animation: popUp 0.4s ease-out;
+        }
+
+        .payment-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+        
+        .payment-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 40px;
+        }
+
+        /* Buttons */
+        .pay-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* AI Button Style */
+        .btn-ai {
+            background: linear-gradient(135deg, #3A7BFF 0%, #2563EB 100%);
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(58, 123, 255, 0.4);
+        }
+        .btn-ai:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px -5px rgba(58, 123, 255, 0.5);
+        }
+        /* Sparkle icon animation for AI */
+        .btn-ai i { animation: pulse 2s infinite; }
+
+        /* Direct Pay Style */
+        .btn-direct {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-light);
+        }
+        .btn-direct:hover {
+            background: var(--primary-light);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        /* Divider */
+        .divider {
+            margin: 30px 0;
+            position: relative;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #E2E8F0;
+        }
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+
+        /* Back Link */
+        .back-link {
+            margin-top: 20px;
+            display: inline-block;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--primary-color); }
+
+        /* Animations */
+        @keyframes popUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.2); opacity: 0.8; } 100% { transform: scale(1); opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Decorative Backgrounds -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <!-- Central Payment Box -->
+    <div class="payment-box">
+        <div class="payment-header">
+            <div style="font-size: 3rem; color: var(--primary-color); margin-bottom: 15px;">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <h2>Choose Payment Mode</h2>
+            <p>Select how you would like to proceed with your medical bill payment.</p>
+        </div>
+
+        <!-- Option 1: AI Analyzer -->
+        <button class="pay-btn btn-ai" onclick="window.location.href='{% url 'ai_bill_analyzer' %}'">
+            <i class="fas fa-magic"></i>
+            Pay using AI Bill Analyzer
+        </button>
+
+        <div class="divider">OR</div>
+
+        <!-- Option 2: Direct Pay -->
+        <button class="pay-btn btn-direct" onclick="window.location.href='{% url 'emi_payment' %}'">
+            <i class="fas fa-credit-card"></i>
+            Pay Directly
+        </button>
+
+        <a href="{% url 'dashboard' %}" class="back-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <script>
+        function initiatePayment(btnElement, method) {
+            const originalText = btnElement.innerHTML;
+            
+            // Loading State
+            btnElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Processing...';
+            btnElement.style.opacity = "0.8";
+            btnElement.style.pointerEvents = "none"; // Prevent double clicks
+
+            setTimeout(() => {
+                alert("Redirecting to " + method + " gateway...");
+                
+                // Reset button (optional, mainly for demo if user stays on page)
+                btnElement.innerHTML = originalText;
+                btnElement.style.opacity = "1";
+                btnElement.style.pointerEvents = "auto";
+                
+                // In a real app, you would redirect here:
+                // window.location.href = 'payment_gateway.html'; 
+            }, 800);
+        }
+    </script>
+
+</body>
+</html>

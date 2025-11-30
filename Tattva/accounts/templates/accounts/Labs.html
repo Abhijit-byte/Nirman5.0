@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>LifeCord - My Health Reports</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E64A19;
+            --primary-light: #FFE0B2;
+            --bg-body: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+            --border: #E2E8F0;
+            
+            --success: #10B981;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --danger: #EF4444;
+            
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --nav-height: 70px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-body); color: var(--text-main); padding-bottom: 80px; }
+
+        /* --- Header --- */
+        .header {
+            background: var(--card-bg);
+            height: var(--nav-height);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .brand { font-size: 1.4rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .nav-icon-wrapper { position: relative; }
+
+        /* Notification Bell */
+        .notif-btn { 
+            width: 40px; height: 40px; border-radius: 50%; background: #F3F4F6; 
+            display: flex; align-items: center; justify-content: center; cursor: pointer; 
+            transition: background 0.2s; color: var(--text-main); font-size: 1.2rem;
+        }
+        .notif-btn:hover { background: #E5E7EB; color: var(--primary); }
+        .notif-badge { 
+            position: absolute; top: 0; right: 0; background: var(--danger); color: white; 
+            font-size: 0.7rem; width: 16px; height: 16px; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; font-weight: 700; border: 2px solid white;
+        }
+
+        /* Profile Icon */
+        .profile-icon { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3); }
+
+        /* Dropdowns */
+        .dropdown-menu {
+            position: absolute; top: 55px; right: 0; width: 300px; 
+            background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+            border: 1px solid var(--border); display: none; flex-direction: column; z-index: 1000;
+            overflow: hidden; animation: fadeDown 0.2s ease;
+        }
+        .dropdown-menu.show { display: flex; }
+        
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Profile Menu Specifics */
+        .profile-menu { width: 280px; }
+        .profile-header { padding: 20px; background: var(--bg-body); border-bottom: 1px solid var(--border); }
+        .p-name { font-weight: 700; font-size: 1.1rem; color: var(--text-main); }
+        .p-abha { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; font-family: monospace; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+
+        .dropdown-item { 
+            padding: 12px 20px; display: flex; align-items: center; gap: 12px; 
+            color: var(--text-main); font-size: 0.9rem; cursor: pointer; transition: background 0.2s; text-decoration: none;
+        }
+        .dropdown-item:hover { background: #F9FAFB; color: var(--primary); }
+        .dropdown-item.danger { color: var(--danger); }
+        .dropdown-item.danger:hover { background: #FEF2F2; }
+        .dropdown-item i { width: 20px; text-align: center; color: var(--text-muted); }
+        .dropdown-item:hover i { color: var(--primary); }
+        .dropdown-item.danger i { color: var(--danger); }
+
+        .menu-section-label { 
+            padding: 10px 20px 5px; font-size: 0.75rem; font-weight: 700; 
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; 
+        }
+        .dropdown-divider { height: 1px; background: var(--border); margin: 5px 0; }
+
+        /* Toggle Switch */
+        .toggle-item { justify-content: space-between; }
+        .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(16px); }
+
+        /* Notifications */
+        .notif-item { padding: 15px; border-bottom: 1px solid var(--bg-body); display: flex; gap: 12px; align-items: start; cursor: pointer; transition: background 0.2s; }
+        .notif-item:hover { background: #FFF7ED; }
+        .notif-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+        .notif-content div { font-size: 0.9rem; font-weight: 600; margin-bottom: 2px; color: var(--text-main); }
+        .notif-content p { font-size: 0.75rem; color: var(--text-muted); margin: 0; line-height: 1.4; }
+        .notif-time { font-size: 0.7rem; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+        
+        .bg-green-light { background: #DCFCE7; color: #166534; }
+        .bg-blue-light { background: #E0F2FE; color: #075985; }
+        .bg-orange-light { background: #FFEDD5; color: #9A3412; }
+
+        /* --- Container & Other Styles --- */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card-bg); padding: 15px; border-radius: var(--radius); text-align: center; box-shadow: var(--shadow); }
+        .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.8rem; color: var(--text-muted); }
+
+        .controls { margin-bottom: 25px; }
+        .search-bar { position: relative; margin-bottom: 15px; }
+        .search-bar input { width: 100%; padding: 15px 15px 15px 45px; border-radius: 12px; border: 1px solid var(--border); outline: none; font-size: 1rem; transition: border-color 0.2s; }
+        .search-bar input:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+        .categories { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; margin-bottom: 15px; }
+        .categories::-webkit-scrollbar { display: none; }
+        .cat-pill { padding: 8px 16px; border-radius: 20px; background: white; border: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
+        .cat-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* View Toggles */
+        .view-toggles {
+            display: flex; background: #F3F4F6; padding: 5px; border-radius: 12px; margin-bottom: 20px;
+        }
+        .view-btn {
+            flex: 1; padding: 10px; text-align: center; border-radius: 8px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 600; color: var(--text-muted); transition: all 0.2s;
+        }
+        .view-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* Section Headers */
+        .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .section-title i { color: var(--primary); }
+
+        .timeline { position: relative; padding-left: 20px; }
+        .timeline::before { content: ''; position: absolute; left: 0; top: 10px; bottom: 0; width: 2px; background: #E2E8F0; border-radius: 2px; }
+        
+        /* Card Styles */
+        .report-card { 
+            background: var(--card-bg); 
+            border-radius: var(--radius); 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: var(--shadow); 
+            position: relative; 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s; 
+            cursor: pointer; 
+            border: 1px solid transparent; 
+        }
+        
+        .report-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 30px -5px rgba(255, 107, 53, 0.15); 
+            border-color: var(--primary-light);
+        }
+        
+        .report-card::after { content: ''; position: absolute; left: -25px; top: 25px; width: 12px; height: 12px; background: var(--bg-body); border: 3px solid var(--primary); border-radius: 50%; z-index: 1; }
+        .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .test-name { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+        .test-date { font-size: 0.8rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+        .lab-info { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; }
+        .lab-badge { background: #F3F4F6; padding: 2px 8px; border-radius: 4px; font-weight: 500; font-size: 0.75rem; color: #4B5563; }
+        
+        .card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 1px solid var(--bg-body); }
+        
+        .status-pill { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .status-completed { background: #DCFCE7; color: #166534; }
+        .status-pending { background: #FEF3C7; color: #D97706; }
+        .status-processing { background: #E0F2FE; color: #075985; }
+        
+        /* Action Buttons */
+        .action-group { display: flex; gap: 10px; }
+        .action-btn { padding: 8px 16px; border-radius: 8px; border: none; font-size: 0.85rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
+        
+        .btn-view { background: var(--primary-light); color: var(--primary-dark); }
+        .btn-view:hover { background: #FFCC80; }
+        
+        /* New Share Button Style */
+        .btn-share { background: #F3E8FF; color: #7E22CE; }
+        .btn-share:hover { background: #E9D5FF; }
+
+        .verified-badge { color: var(--info); font-size: 0.9rem; margin-left: 5px; }
+
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal { background: white; width: 90%; max-width: 500px; border-radius: 24px; display: flex; flex-direction: column; box-shadow: 0 25px 50px rgba(0,0,0,0.25); animation: slideUp 0.3s ease-out; }
+        
+        .modal-lg { height: 80vh; } /* Large modal for viewer */
+        .modal-sm { height: auto; padding-bottom: 20px; } /* Small modal for share */
+
+        .modal-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { flex: 1; padding: 20px; overflow-y: auto; background: #F9FAFB; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .modal-footer { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+        
+        .report-preview-box { width: 100%; height: 100%; background: white; border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; border-radius: 8px; }
+        .btn-full { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-secondary { background: var(--bg-body); color: var(--text-main); }
+
+        .reminder-card { background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%); border: 1px solid #FED7AA; margin-bottom: 25px; padding: 15px; border-radius: var(--radius); display: flex; align-items: center; gap: 15px; }
+        .reminder-icon { width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--warning); font-size: 1.2rem; }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: white; border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 90; padding-bottom: 10px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--text-muted); font-size: 0.75rem; text-decoration: none; }
+        .nav-item.active { color: var(--primary); font-weight: 600; }
+        .nav-item i { font-size: 1.2rem; }
+        @media(min-width: 768px) { .bottom-nav { display: none; } }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="brand">
+            <div style="width:32px; height:32px; background:var(--gradient-primary); border-radius:8px; display:flex; align-items:center; justify-content:center; color:white;">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <span>LifeCord Reports</span>
+        </div>
+        
+        <div class="nav-right">
+            <!-- Notifications -->
+            <div class="nav-icon-wrapper">
+                <div class="notif-btn" onclick="toggleNotifMenu(event)">
+                    <div class="notif-badge">2</div>
+                    <i class="far fa-bell"></i>
+                </div>
+                <div class="dropdown-menu" id="notifDropdown" style="width: 320px;">
+                    <div class="notif-item">
+                        <div class="notif-icon bg-green-light"><i class="fas fa-flask"></i></div>
+                        <div class="notif-content">
+                            <div>Lab Report Ready</div>
+                            <p>Your CBC Report from Apollo is ready.</p>
+                        </div>
+                        <div class="notif-time">2m</div>
+                    </div>
+                    <div class="notif-item">
+                        <div class="notif-icon bg-blue-light"><i class="fas fa-calendar-check"></i></div>
+                        <div class="notif-content">
+                            <div>Lab Booking Confirmed</div>
+                            <p>Thyroid Profile at City Scans.</p>
+                        </div>
+                        <div class="notif-time">1h</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile -->
+            <div class="nav-icon-wrapper">
+                <div class="profile-icon" onclick="toggleProfileMenu(event)">JD</div>
+                <div class="dropdown-menu profile-menu" id="profileDropdown">
+                    <div class="profile-header">
+                        <div class="p-name">John Doe</div>
+                        <div class="p-abha">ABHA: 14-2563-8890-1234</div>
+                    </div>
+                    
+                    <a class="dropdown-item" href="#"><i class="fas fa-user-edit"></i> Edit Profile</a>
+                    
+                    <div class="menu-section-label">Security</div>
+                    <a class="dropdown-item" href="#"><i class="fas fa-key"></i> Change Password</a>
+                    <div class="dropdown-item toggle-item">
+                        <span style="display:flex; gap:12px; align-items:center;"><i class="fas fa-shield-alt"></i> 2-Step Login</span>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="menu-section-label">Help</div>
+                    <a class="dropdown-item" href="#"><i class="fas fa-question-circle"></i> Help Center</a>
+                    <a class="dropdown-item" href="#"><i class="fas fa-envelope"></i> Contact Us</a>
+                    
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item danger" onclick="alert('Logged out successfully.')"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- Stats Overview -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-val">14</div>
+                <div class="stat-label">Total Reports</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" style="color:var(--warning);">2</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val" style="color:var(--success);">1</div>
+                <div class="stat-label">New</div>
+            </div>
+        </div>
+
+        <!-- Reminder Section -->
+        <div class="reminder-card">
+            <div class="reminder-icon"><i class="fas fa-bell"></i></div>
+            <div>
+                <div style="font-weight: 600; color: #9A3412; font-size: 0.95rem;">Follow-up Required</div>
+                <div style="font-size: 0.85rem; color: #C2410C;">Dr. Sharma suggested a Thyroid Profile re-test on Dec 10.</div>
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="controls">
+            <div class="search-bar">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Search reports (e.g., CBC, Lipid)..." onkeyup="filterReports()">
+            </div>
+            
+            <div class="categories">
+                <div class="cat-pill active" onclick="filterCat('all', this)">All</div>
+                <div class="cat-pill" onclick="filterCat('blood', this)">Blood Tests</div>
+                <div class="cat-pill" onclick="filterCat('urine', this)">Urine</div>
+                <div class="cat-pill" onclick="filterCat('scans', this)">Scans & X-Ray</div>
+                <div class="cat-pill" onclick="filterCat('doctor', this)">Prescriptions</div>
+            </div>
+            
+            <!-- New/Old Toggle -->
+            <div class="view-toggles">
+                <div class="view-btn active" onclick="switchView('new', this)">Upcoming / Pending Reports</div>
+                <div class="view-btn" onclick="switchView('old', this)">Past Reports</div>
+            </div>
+        </div>
+
+        <!-- Timeline Reports -->
+        <div class="timeline" id="reportsList">
+            <!-- Dynamic Content Loaded Here -->
+        </div>
+
+    </main>
+
+    <!-- Viewer Modal -->
+    <div id="viewerModal" class="modal-overlay">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3 id="modalTitle">Report Details</h3>
+                <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="closeModal('viewerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="report-preview-box">
+                    <i class="fas fa-file-pdf" style="font-size: 3rem; color: var(--danger); margin-bottom: 15px;"></i>
+                    <h4>Lab_Report_Final.pdf</h4>
+                    <p style="font-size:0.8rem;">Verified by Apollo Diagnostics</p>
+                    <div style="margin-top:20px; padding: 10px; background:#F0FDF4; color:#166534; border-radius:8px; font-size:0.8rem; display:inline-flex; align-items:center; gap:5px;">
+                        <i class="fas fa-check-circle"></i> Digital Signature Verified
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-full btn-secondary" onclick="closeModal('viewerModal')">Close</button>
+                <button class="btn-full btn-primary" onclick="alert('Downloading...')"><i class="fas fa-download"></i> Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal-overlay">
+        <div class="modal modal-sm" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Share Report</h3>
+                <button style="background:none; border:none; font-size:1.5rem; cursor:pointer;" onclick="closeModal('shareModal')">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <div style="width: 60px; height: 60px; background: #E0F2FE; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                    <i class="fas fa-user-md" style="font-size: 1.8rem; color: #0284C7;"></i>
+                </div>
+                <p style="font-size: 1rem; margin-bottom: 10px;">Share <strong><span id="shareReportName">Report</span></strong> with</p>
+                <h3 style="color: var(--primary); margin-bottom: 5px;">Dr. Anjali Gupta</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Family Physician • General Medicine</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-full btn-secondary" onclick="closeModal('shareModal')">Cancel</button>
+                <button class="btn-full btn-primary" onclick="confirmShare()">Share Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav (Mobile) -->
+    <nav class="bottom-nav">
+        <a href="homepage.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item active">
+            <i class="fas fa-file-medical-alt"></i>
+            <span>Reports</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        // NEW REPORTS (Upcoming / Pending / Recent)
+        const newReportsData = [
+            { id: 1, name: "Complete Blood Count (CBC)", date: "Today", lab: "Apollo Diagnostics", status: "Completed", category: "blood", verified: true },
+            { id: 2, name: "Lipid Profile", date: "Yesterday", lab: "Thyrocare", status: "Processing", category: "blood", verified: false },
+            { id: 3, name: "Urine Routine", date: "Yesterday", lab: "Pathkind Labs", status: "Completed", category: "urine", verified: true },
+            { id: 4, name: "Vitamin D", date: "2 Days ago", lab: "Apollo Diagnostics", status: "Completed", category: "blood", verified: true },
+            { id: 5, name: "Liver Function Test", date: "3 Days ago", lab: "City Scans", status: "Completed", category: "blood", verified: true },
+            { id: 6, name: "Blood Sugar (Fasting)", date: "4 Days ago", lab: "Dr. Lal PathLabs", status: "Completed", category: "blood", verified: true }
+        ];
+
+        // OLD REPORTS (Past History)
+        const oldReportsData = [
+            { id: 7, name: "MRI - Brain Scan", date: "15 Oct 2024", lab: "City Scans", status: "Completed", category: "scans", verified: true },
+            { id: 8, name: "Thyroid Profile", date: "05 Aug 2024", lab: "Apollo Diagnostics", status: "Completed", category: "blood", verified: true },
+            { id: 9, name: "Chest X-Ray", date: "12 July 2024", lab: "City Scans", status: "Completed", category: "scans", verified: true },
+            { id: 10, name: "Kidney Function Test", date: "20 June 2024", lab: "Pathkind Labs", status: "Completed", category: "blood", verified: true },
+            { id: 11, name: "Dengue Profile", date: "15 May 2024", lab: "Thyrocare", status: "Completed", category: "blood", verified: true },
+            { id: 12, name: "Full Body Checkup", date: "10 Jan 2024", lab: "Apollo Diagnostics", status: "Completed", category: "blood", verified: true },
+            { id: 13, name: "Doctor Prescription", date: "05 Dec 2023", lab: "Dr. Sharma Clinic", status: "Completed", category: "doctor", verified: false }
+        ];
+
+        const listContainer = document.getElementById('reportsList');
+        let currentCat = 'all';
+        let currentView = 'new'; // 'new' or 'old'
+
+        function renderReports(filterText = "") {
+            listContainer.innerHTML = "";
+            
+            // Select dataset based on view
+            const data = currentView === 'new' ? newReportsData : oldReportsData;
+
+            const filtered = data.filter(r => {
+                const matchesCat = currentCat === 'all' || r.category === currentCat;
+                const matchesSearch = r.name.toLowerCase().includes(filterText.toLowerCase()) || r.lab.toLowerCase().includes(filterText.toLowerCase());
+                return matchesCat && matchesSearch;
+            });
+
+            if(filtered.length === 0) {
+                listContainer.innerHTML = `<div style="text-align:center; padding:40px; color:#9CA3AF;">No reports found in ${currentView === 'new' ? 'recent' : 'history'}.</div>`;
+                return;
+            }
+
+            filtered.forEach(r => {
+                const statusClass = r.status === 'Completed' ? 'status-completed' : (r.status === 'Processing' ? 'status-processing' : 'status-pending');
+                const icon = r.status === 'Processing' ? '<i class="fas fa-circle-notch fa-spin"></i>' : '<i class="fas fa-check"></i>';
+                const verifiedBadge = r.verified ? `<i class="fas fa-shield-alt verified-badge" title="Verified Report"></i>` : '';
+                
+                // Share Button (Only for Completed)
+                const shareBtn = r.status === 'Completed' ? 
+                    `<button class="action-btn btn-share" onclick="openShareModal('${r.name}')"><i class="fas fa-share-alt"></i> Share</button>` : '';
+
+                const viewBtnText = r.status === 'Completed' ? 'View Report' : 'Track Status';
+                const viewBtnAction = r.status === 'Completed' ? `openViewer('${r.name}')` : `alert('This report is still processing.')`;
+
+                const html = `
+                <div class="report-card">
+                    <div class="card-header" onclick="${viewBtnAction}">
+                        <div class="test-name">${r.name} ${verifiedBadge}</div>
+                        <div class="status-pill ${statusClass}">${icon} ${r.status}</div>
+                    </div>
+                    <div class="lab-info" onclick="${viewBtnAction}">
+                        <span class="lab-badge"><i class="fas fa-building"></i> ${r.lab}</span>
+                    </div>
+                    <div class="card-footer">
+                        <div class="test-date"><i class="far fa-calendar-alt"></i> ${r.date}</div>
+                        <div class="action-group">
+                            ${shareBtn}
+                            <button class="action-btn btn-view" onclick="${viewBtnAction}">
+                                ${viewBtnText} <i class="fas fa-chevron-right" style="font-size:0.7rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+                listContainer.innerHTML += html;
+            });
+        }
+
+        function filterCat(cat, el) {
+            currentCat = cat;
+            document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            renderReports(document.getElementById('searchInput').value);
+        }
+        
+        function switchView(view, el) {
+            currentView = view;
+            document.querySelectorAll('.view-btn').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            renderReports(document.getElementById('searchInput').value);
+        }
+
+        function filterReports() {
+            const text = document.getElementById('searchInput').value;
+            renderReports(text);
+        }
+
+        // --- Dropdown Logic ---
+        function toggleProfileMenu(e) {
+            e.stopPropagation();
+            document.getElementById('notifDropdown').classList.remove('show');
+            document.getElementById('profileDropdown').classList.toggle('show');
+        }
+
+        function toggleNotifMenu(e) {
+            e.stopPropagation();
+            document.getElementById('profileDropdown').classList.remove('show');
+            document.getElementById('notifDropdown').classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.closest('.nav-icon-wrapper')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            }
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Modal Logic
+        function openViewer(title) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('viewerModal').style.display = 'flex';
+        }
+
+        function openShareModal(reportName) {
+            document.getElementById('shareReportName').innerText = reportName;
+            document.getElementById('shareModal').style.display = 'flex';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function confirmShare() {
+            closeModal('shareModal');
+            alert("Report shared successfully with Dr. Anjali Gupta!");
+        }
+
+        // Initial Render
+        renderReports();
+
+    </script>
+</body>
+</html>

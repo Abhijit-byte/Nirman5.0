@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LifeCord | Doctor Appointments</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+    /* LIFE_CORD VARIABLES RE-APPLIED */
+    :root {
+        --primary-color: #3A7BFF;
+        --primary-dark: #2563EB;
+        --primary-light: #EBF3FF;
+        --bg-color: #F8FAFC;
+        --card-bg: #FFFFFF;
+        --text-main: #0F172A;
+        --text-muted: #64748B;
+        --color-accent: #F97316; /* Using ABHA Orange as a strong accent where needed (e.g., slider) */
+        
+        --radius-card: 20px;
+        --shadow-soft: 0 4px 20px rgba(0,0,0,0.03);
+        --shadow-float: 0 8px 20px rgba(58, 123, 255, 0.15);
+    }
+    
+    body {
+        margin: 0;
+        /* Updated: Background color from variables */
+        font-family: 'Poppins', sans-serif; 
+        background: var(--bg-color); 
+        color: var(--text-main);
+        /* Ensure font-size remains readable, Poppins often looks slightly smaller */
+        line-height: 1.5; 
+    }
+
+    /* HEADER */
+    .header {
+        padding: 16px 20px; /* Added horizontal padding for consistency */
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        background: var(--card-bg);
+        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    .header img { 
+        width: 42px; 
+        height: 42px; 
+        border-radius: 50%; 
+        border: 2px solid var(--primary-color); /* Added primary color accent */
+    }
+    .header .user-name {
+        font-size: 16px; /* Slightly reduced font size for consistency */
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    .header .user-meta {
+        color: var(--text-muted); /* Used muted color */
+        font-size: 13px;
+    }
+
+    /* TOGGLE - REVISED */
+    .toggle-wrapper {
+        padding: 5px; /* Slightly increased padding */
+        width: 90%; 
+        max-width: 400px; /* Constrain max width */
+        margin: 20px auto 10px; /* Center and add top margin */
+        height: 45px; /* Slightly reduced height */
+        background: var(--primary-light); /* Lighter blue background */
+        display: flex; 
+        align-items: center;
+        position: relative; 
+        border-radius: 25px; 
+        box-sizing: border-box; 
+    }
+
+    .toggle-btn {
+        width: 50%; 
+        text-align: center;
+        font-weight: 500; /* Slightly lighter weight */
+        font-size: 14px;
+        cursor: pointer; 
+        z-index: 2; 
+        color: var(--text-main);
+        border-radius: 20px; 
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: color 0.25s ease;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        width: calc(50% - 10px); /* Adjusted for 5px padding */
+        height: calc(100% - 10px); /* Adjusted for 5px padding */
+        background: var(--primary-color); /* Use primary blue for slider */
+        border-radius: 20px; 
+        top: 5px; 
+        left: 5px;
+        transition: 0.25s ease;
+        z-index: 1;
+        box-shadow: var(--shadow-soft); /* Soft shadow on the slider */
+    }
+    
+    /* SECTION TITLE */
+    .section-title {
+        font-size: 18px; 
+        font-weight: 600; /* Match Poppins style */
+        margin: 20px 20px 10px; /* Increased margin */
+        color: var(--text-main); 
+    }
+
+    /* SPECIALTY */
+    .specialty-scroll {
+        width: 100%; overflow-x: auto;
+        white-space: nowrap; padding: 10px 0 20px 10px; /* Added left padding */
+        scrollbar-width: none;
+    }
+    .specialty-scroll::-webkit-scrollbar { display: none; }
+
+    .special-card {
+        display: inline-block;
+        width: 35%; 
+        height: 220px;
+        margin-left: 10px; /* Adjusted margin */
+        border-radius: var(--radius-card); /* Used variable */
+        overflow: hidden; 
+        cursor: pointer;
+        background: var(--card-bg);
+        box-shadow: var(--shadow-soft); /* Used soft shadow variable */
+        border: 2px solid transparent; /* Subtle, default transparent border */
+        position: relative;
+        transition: border 0.3s ease;
+    }
+    /* Add effect on hover/active to show primary color border */
+    .special-card:hover, .special-card:active {
+        border-color: var(--primary-color);
+        transform: scale(0.98);
+    }
+    .special-card img { width: 100%; height: 100%; object-fit: cover; }
+    
+    .specialty-label {
+        position: absolute;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        background: rgba(255,255,255,0.95); /* Slightly less transparent */
+        padding: 8px 12px;
+        border-radius: 14px; /* Slightly more rounded */
+        font-weight: 600;
+        font-size: 13px; /* Slightly smaller font for clarity */
+        color: var(--text-main);
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* DATE */
+    .dynamic-date {
+        text-align: center; margin-top: 25px;
+        font-size: 20px; 
+        font-weight: 700;
+        color: var(--text-main); /* Use main text color */
+    }
+
+    /* DAY PICKER */
+    .day-picker-wrapper {
+        display: flex; 
+        justify-content: center;
+        gap: 10px; /* Slightly reduced gap */
+        margin-top: 20px;
+    }
+    .day-picker-wrapper small {
+        display: block;
+        font-size: 10px;
+        font-weight: 500;
+        margin-top: 4px;
+        opacity: 0.8;
+    }
+    .day-picker-wrapper > div {
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+    .side-day {
+        width: 70px; 
+        height: 80px;
+        background: var(--card-bg); 
+        opacity: 0.6; /* Reduced opacity for side days */
+        border-radius: 16px; /* Increased radius */
+        text-align: center;
+        padding-top: 10px; 
+        font-weight: 600;
+        filter: none; /* Removed blur */
+        transform: scale(.9); /* Subtle scale */
+        color: var(--text-muted); /* Muted color for inactive */
+        border: 1px solid #E2E8F0; /* Light, subtle border */
+    }
+    .center-day {
+        width: 90px; 
+        height: 100px;
+        background: var(--primary-color); 
+        color: white;
+        border-radius: 20px; /* Increased radius */
+        padding-top: 18px; 
+        text-align: center;
+        font-size: 20px; 
+        font-weight: 700;
+        box-shadow: var(--shadow-float); /* Primary color shadow */
+        border: 2px solid var(--primary-dark); /* Darker primary color border accent */
+        transform: scale(1.05); /* Prominent scale for active day */
+    }
+
+    /* DOCTOR LIST */
+    .doctor-title {
+        font-size: 18px; 
+        font-weight: 600; /* Match section title style */
+        margin: 30px 20px 15px;
+        color: var(--text-main);
+    }
+    .doctor-card {
+        width: 90%; 
+        margin: 12px auto;
+        padding: 15px; 
+        background: var(--card-bg);
+        border-radius: 18px; /* Consistent radius */
+        display: flex; 
+        gap: 12px;
+        opacity: 0; 
+        transform: translateY(40px);
+        transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother transition */
+        box-shadow: var(--shadow-soft); /* Soft shadow */
+        cursor: pointer;
+        border: 1px solid #E2E8F0; /* Light, subtle border */
+    }
+    .doctor-card:hover {
+        box-shadow: 0 6px 20px rgba(58, 123, 255, 0.1);
+    }
+    .doctor-card.show { opacity: 1; transform: translateY(0); }
+    .doctor-card img { 
+        width: 55px; 
+        height: 55px; 
+        border-radius: 50%; 
+        border: 2px solid var(--color-accent); /* Used accent color for image border */
+        object-fit: cover;
+    }
+    .doctor-card small {
+        color: var(--text-muted) !important;
+        font-size: 12px;
+    }
+
+    /* POPUP */
+    .doctor-overlay {
+        position: fixed; top: 0; left: 0;
+        width: 100vw; height: 100vh;
+        backdrop-filter: blur(8px);
+        background: rgba(15, 23, 42, 0.5); /* Darker, slightly blue tint */
+        display: none; justify-content: center;
+        align-items: center; padding: 10px;
+        z-index: 50;
+    }
+    .doctor-popup {
+        width: 90%; /* Increased width */
+        max-width: 450px;
+        max-height: 90vh; /* Increased height */
+        background: var(--card-bg); 
+        border-radius: var(--radius-card); /* Consistent radius */
+        border: 4px solid var(--primary-color); /* Primary color border */
+        padding: 20px; /* Increased padding */
+        overflow-y: auto;
+    }
+    .book-btn {
+        background: var(--primary-color); 
+        color: white;
+        padding: 12px 16px; /* Increased padding */
+        text-align: center;
+        border-radius: 14px; /* Consistent radius */
+        cursor: pointer;
+        margin-top: 15px;
+        font-weight: 600;
+        box-shadow: var(--shadow-float);
+    }
+    .popup-doc-top {
+        display: flex; gap: 12px; margin-bottom: 20px;
+    }
+    .popup-doc-top img {
+        width: 70px; height: 70px; border-radius: 50%;
+        border: 3px solid var(--primary-color);
+    }
+    .popup-doc-top > div > div:first-child {
+        font-size: 18px;
+    }
+    .popup-doc-top > div > div:nth-child(2) {
+        font-size: 14px;
+        color: var(--color-accent);
+        font-weight: 600;
+    }
+
+
+    .achievement, .expertise {
+        background: var(--primary-light); /* Light primary color background */
+        padding: 12px; /* Increased padding */
+        border-radius: 14px; /* Consistent radius */
+        margin-top: 10px;
+        color: var(--text-main);
+        font-size: 14px;
+    }
+    .achievement b, .expertise b {
+        color: var(--primary-dark);
+        display: block;
+        margin-bottom: 5px;
+        font-size: 15px;
+    }
+
+    .feedback-card {
+        background: var(--card-bg); 
+        padding: 12px;
+        margin-top: 10px; 
+        border-radius: 12px;
+        opacity: 0; 
+        transform: translateY(15px);
+        transition: .4s ease;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+        color: var(--text-main);
+        font-size: 14px;
+        border-left: 3px solid var(--color-accent);
+    }
+    .feedback-card.show { opacity: 1; transform: translateY(0); }
+
+    .close-btn {
+        padding: 12px; margin-top: 15px;
+        background: #DCFCE7; /* Light green for dismissal */
+        color: #10B981; /* Medicine Green color */
+        border-radius: 14px; 
+        text-align: center;
+        font-weight: 600; 
+        cursor: pointer;
+    }
+
+    /* -------------------------------
+        📱 MOBILE RESPONSIVE FIX
+    -------------------------------- */
+    @media (max-width: 600px) {
+        .header { padding: 16px 15px; }
+        .specialty-scroll { padding-left: 15px; }
+        .special-card { width: 60% !important; height: 200px; }
+        .toggle-wrapper { width: 95%; }
+        .doctor-card { width: 95%; }
+        .doctor-title { margin-left: 15px; }
+        .section-title { margin-left: 15px; }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="https://ui-avatars.com/api/?name=Arina+Denver&background=3A7BFF&color=fff&size=100">
+    <div>
+        <div class="user-name">Arina Denver</div>
+        <div class="user-meta">Female, 25 y.o</div>
+    </div>
+</div>
+
+<div class="toggle-wrapper">
+    <div class="toggle-slider" id="toggleSlider"></div>
+    <div class="toggle-btn" id="onlineBtn" style="color: white;">Online</div> <div class="toggle-btn" id="offlineBtn">Offline</div>
+</div>
+
+<div class="section-title">Specialty</div>
+
+<div class="specialty-scroll" id="specialtyScroll">
+    <div class="special-card" data-specialty="Cardiology">
+        <img src="https://www.mayoclinic.org/-/media/kcms/gbs/medical-professionals/images/2025/03/14/20/27/cardio-advances-767x535.jpg">
+        <div class="specialty-label">Cardiology</div>
+    </div>
+    
+    <div class="special-card" data-specialty="Dermatology">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCt_-cn7c87KFYTusm1-FcNMIAkBUvVBHyVw&s">
+        <div class="specialty-label">Dermatology</div>
+    </div>
+    
+    <div class="special-card" data-specialty="Neurology">
+        <img src="https://cpd.partners.org/sites/default/files/course/2025-01/neurology_brain.jpg">
+        <div class="specialty-label">Neurology</div>
+    </div>
+
+    <div class="special-card" data-specialty="Orthopedics">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgqE-f1dW9cXl1UQT4ePINoe6ct0AiqEEmKA&s">
+        <div class="specialty-label">Orthopedics</div>
+    </div>
+    
+    <div class="special-card" data-specialty="Pediatrics">
+        <img src="https://www.anitarajpurohit.com/wp-content/uploads/2020/08/neonatology-665x494.jpg">
+        <div class="specialty-label">Pediatrics</div>
+    </div>
+    
+    <div class="special-card" data-specialty="Gynecology">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_YHyKeDsxhCH0Ew2JAiYPTB9m4t1ngaPw-RZWOGQ938Z0oJeaiYPTB9m4t1ngaPw-RZWOGQ938Z0oJeai94ddWTywS6ifvr9d9I&usqp=CAU">
+        <div class="specialty-label">Gynecology</div>
+    </div>
+    
+    <div class="special-card" data-specialty="ENT">
+        <img src="https://www.entkolkata.in/wp-content/uploads/2023/01/Test-Your-Ear-Nose-and-Throat-1.jpg">
+        <div class="specialty-label">ENT</div>
+    </div>
+    
+    <div class="special-card" data-specialty="Ophthalmology">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_M96gjTnX8jdGBC032s3lLllO0APuQ6acfg&s">
+        <div class="specialty-label">Ophthalmology</div>
+    </div>
+    
+    <div class="special-card" data-specialty="Psychiatry">
+        <img src="https://zeelhospital.com/wp-content/uploads/2020/08/Psychiatric.jpg">
+        <div class="specialty-label">Psychiatry</div>
+    </div>
+    
+    <div class="special-card" data-specialty="Dentistry">
+        <img src="https://www.yourdentistryguide.com/wp-content/uploads/2017/11/tooth-cleaning-925x425.jpg" alt="Dentistry - Dental clinic equipment">
+        <div class="specialty-label">DENTISTRY</div>
+    </div>
+    
+    
+    <div class="special-card" data-specialty="Physiotherapy">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRL8sx5Y5uk-wsxvqTSBdTsXMh9Gtbvytsh1Q&s">
+        <div class="specialty-label">Physiotherapy</div>
+    </div>
+
+</div>
+
+<div id="dynamicDate" class="dynamic-date"></div>
+
+<div class="day-picker-wrapper">
+    <div class="side-day" id="leftDay"></div>
+    <div class="center-day" id="centerDay"></div>
+    <div class="side-day" id="rightDay"></div>
+</div>
+
+<div class="doctor-title">Available Doctors</div>
+<div id="doctorList"></div>
+
+<div class="doctor-overlay" id="doctorOverlay">
+    <div class="doctor-popup" id="popupBox"></div>
+</div>
+
+<script>
+
+/* AUTO SCROLL SPECIALTY */
+setInterval(() => {
+    const s = document.getElementById("specialtyScroll");
+    s.scrollBy({ left: 300, behavior: "smooth" });
+    if (s.scrollLeft + s.clientWidth >= s.scrollWidth - 10)
+        s.scrollTo({ left: 0, behavior: "smooth" });
+}, 2500);
+
+/* DYNAMIC DATE */
+const dynamicDate = document.getElementById('dynamicDate');
+const today = new Date();
+dynamicDate.textContent =
+    "Today • " + today.toLocaleString("default", { day: "numeric", month: "long" });
+
+/* DAY PICKER */
+const leftDay = document.getElementById('leftDay');
+const centerDay = document.getElementById('centerDay');
+const rightDay = document.getElementById('rightDay');
+
+let dayOffset = 0;
+function updateDays() {
+    const n = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const c = new Date(); c.setDate(c.getDate() + dayOffset);
+    const p = new Date(); p.setDate(p.getDate() + dayOffset - 1);
+    const nx = new Date(); nx.setDate(nx.getDate() + dayOffset + 1);
+
+    centerDay.innerHTML = `${c.getDate()} <small>${n[c.getDay()]}</small>`;
+    leftDay.innerHTML  = `${p.getDate()} <small>${n[p.getDay()]}</small>`;
+    rightDay.innerHTML = `${nx.getDate()} <small>${n[nx.getDay()]}</small>`;
+}
+updateDays();
+
+leftDay.onclick = () => { dayOffset--; updateDays(); showAllDoctors(); };
+rightDay.onclick = () => { dayOffset++; updateDays(); showAllDoctors(); };
+
+/* TOGGLE */
+const onlineBtn = document.getElementById('onlineBtn');
+const offlineBtn = document.getElementById('offlineBtn');
+const toggleSlider = document.getElementById('toggleSlider');
+
+onlineBtn.onclick = () => {
+    // Adjusted value for 5px padding on each side
+    toggleSlider.style.left = "5px"; 
+    onlineBtn.style.color = "white";
+    offlineBtn.style.color = "var(--text-main)";
+};
+offlineBtn.onclick = () => {
+    // Adjusted value for 5px padding on each side
+    toggleSlider.style.left = "calc(50% + 5px)"; 
+    offlineBtn.style.color = "white";
+    onlineBtn.style.color = "var(--text-main)";
+};
+
+// Initial state for the toggle slider
+document.addEventListener('DOMContentLoaded', () => {
+    // Set initial toggle text color to white
+    onlineBtn.style.color = "white";
+});
+
+
+/* DOCTOR DATABASE (Data remains the same) */
+const specialtyDoctors = {
+    Cardiology: [
+        {name:"Dr. Rahul Sen", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=15", expertise:"Heart Specialist", achievement:"1500+ angioplasties", feedback:["Very calm","Explains clearly"]},
+        {name:"Dr. Ajay Verma", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=22", expertise:"Cardiac Surgeon", achievement:"20+ years", feedback:["Friendly","Very skilled"]},
+        {name:"Dr. Kiran Patel", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=41", expertise:"ECG Expert", achievement:"Best doctor 2022", feedback:["Great diagnosis","Accurate treatment"]}
+    ],
+    // ... (rest of the data is assumed to be here, omitted for brevity)
+    Dermatology: [
+        {name:"Dr. Aditi Sharma", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=32", expertise:"Skin Expert", achievement:"Award-winning dermatologist", feedback:["Acne cleared","Very sweet doctor"]},
+        {name:"Dr. Naina Kapoor", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=28", expertise:"Hair & Laser", achievement:"Top dermatologist 2023", feedback:["Hairfall gone","Amazing results"]},
+        {name:"Dr. Sai Priya", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=8", expertise:"Pigmentation Expert", achievement:"Skin Renewal", feedback:["Marks reduced","Very polite"]}
+    ],
+    Neurology: [
+        {name:"Dr. Vinny Vang", rating:"⭐ 5.0", img:"https://i.pravatar.cc/150?img=12", expertise:"Brain & Spine", achievement:"10+ yrs", feedback:["Accurate diagnosis","Very polite"]},
+        {name:"Dr. Rohan Mehta", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=16", expertise:"Neurologist", achievement:"200+ surgeries", feedback:["Helped migraines","Very skilled"]},
+        {name:"Dr. Kavya Rao", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=45", expertise:"Movement Disorders", achievement:"Gold Medalist", feedback:["Friendly","Clear explanation"]}
+    ],
+    Orthopedics: [
+        {name:"Dr. Manish Rao", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=50", expertise:"Bone & Joint Specialist", achievement:"15+ years exp", feedback:["Helped knee pain","Kind doctor"]},
+        {name:"Dr. Neha Gupta", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=55", expertise:"Spine Specialist", achievement:"Awarded best ortho 2022", feedback:["Spine pain cured","Very good treatment"]},
+        {name:"Dr. Vivek Kumar", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=60", expertise:"Fracture Expert", achievement:"500+ surgeries", feedback:["Quick recovery","Explains clearly"]}
+    ],
+    Pediatrics: [
+        {name:"Dr. Ananya Reddy", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=23", expertise:"Child Specialist", achievement:"10+ years", feedback:["Very gentle","Best pediatrician"]},
+        {name:"Dr. Piyush Singh", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=20", expertise:"Child Vaccination", achievement:"Immunization expert", feedback:["Very patient","Kids love him"]},
+        {name:"Dr. Meera Das", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=11", expertise:"Child Nutrition", achievement:"Research author", feedback:["Explains diet well","Very helpful"]}
+    ],
+    Gynecology: [
+        {name:"Dr. Ritu Sharma", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=31", expertise:"Women's Health", achievement:"MBBS Gold Medalist", feedback:["Very caring","Gives confidence"]},
+        {name:"Dr. Kalyani Mishra", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=29", expertise:"Pregnancy Care", achievement:"12+ yrs exp", feedback:["Best maternity care","Very supportive"]},
+        {name:"Dr. Aruna Devi", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=34", expertise:"Fertility Expert", achievement:"IVF Specialist", feedback:["Great results","Polite doctor"]}
+    ],
+    ENT: [
+        {name:"Dr. Sushant Roy", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=19", expertise:"Ear, Nose, Throat", achievement:"15 yrs ENT", feedback:["Ear pain gone","Very skilled"]},
+        {name:"Dr. Asha Patil", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=14", expertise:"Sinus & Allergy", achievement:"Top ENT 2023", feedback:["Sinus cured","Very calming"]},
+        {name:"Dr. Anmol Kaushik", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=18", expertise:"Voice Specialist", achievement:"Voice therapy expert", feedback:["Voice improved","Great treatment"]}
+    ],
+    Ophthalmology: [
+        {name:"Dr. Rohan Jain", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=26", expertise:"Eye Specialist", achievement:"Laser surgery expert", feedback:["Vision improved","Very quick checkup"]},
+        {name:"Dr. Niharika Bose", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=37", expertise:"Retina Specialist", achievement:"Top Ophthalmologist", feedback:["Good diagnosis","Very helpful"]},
+        {name:"Dr. Dev Malik", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=40", expertise:"Cornea Specialist", achievement:"10+ years", feedback:["Cornea healed","Very calm doctor"]}
+    ],
+    Psychiatry: [
+        {name:"Dr. Shalini Nair", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=42", expertise:"Mental Health", achievement:"15+ yrs", feedback:["Very supportive","Great listener"]},
+        {name:"Dr. Prateek Rao", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=48", expertise:"Counseling Expert", achievement:"Stress specialist", feedback:["Reduced anxiety","Very comforting"]},
+        {name:"Dr. Esha Sen", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=52", expertise:"Depression Therapy", achievement:"Research scholar", feedback:["Very understanding","Clear guidance"]}
+    ],
+    Dentistry: [
+        {name:"Dr. Rishi Malhotra", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=54", expertise:"Root Canal Expert", achievement:"1000+ RCT", feedback:["Pain-free","Great experience"]},
+        {name:"Dr. Kavita Arora", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=57", expertise:"Braces Specialist", achievement:"Orthodontist", feedback:["Teeth aligned well","Explains everything"]},
+        {name:"Dr. Deepak Roy", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=59", expertise:"General Dentist", achievement:"10+ yrs", feedback:["Very hygienic","Good service"]}
+    ],
+    Physiotherapy: [
+        {name:"Dr. Sneha Bal", rating:"⭐ 4.9", img:"https://i.pravatar.cc/150?img=62", expertise:"Rehab Therapist", achievement:"Pain management expert", feedback:["Back pain cured","Very patient"]},
+        {name:"Dr. Vikram Singh", rating:"⭐ 4.8", img:"https://i.pravatar.cc/150?img=63", expertise:"Sports Physio", achievement:"Team physio", feedback:["Knee recovery","Very supportive"]},
+        {name:"Dr. Anjali Meena", rating:"⭐ 4.7", img:"https://i.pravatar.cc/150?img=64", expertise:"Orthopedic Physio", achievement:"10+ yrs exp", feedback:["Neck pain gone","Very calm"]}
+    ]
+};
+
+
+/* SHOW ALL DOCTORS INITIALLY (Logic unchanged) */
+function showAllDoctors() {
+    const list = document.getElementById("doctorList");
+    list.innerHTML = "";
+
+    const all = [];
+    for (let sp in specialtyDoctors) {
+        all.push(...specialtyDoctors[sp]);
+    }
+
+    all.forEach(doc => {
+        let card = document.createElement("div");
+        card.className = "doctor-card";
+        card.innerHTML = `
+            <img src="${doc.img}">
+            <div>
+                <div style="font-weight:600; color: var(--text-main);">${doc.name} <span style="color: var(--color-accent);">${doc.rating}</span></div>
+                <small style="color: var(--text-muted);">${doc.expertise}</small>
+            </div>
+        `;
+        card.onclick = () => openDoctorPopup(doc);
+        list.appendChild(card);
+    });
+
+    revealDoctorCards();
+}
+showAllDoctors();
+
+
+/* SHOW DOCTORS AFTER SELECTING SPECIALTY (Logic unchanged) */
+function showDoctors(specialty) {
+    const list = document.getElementById("doctorList");
+    list.innerHTML = "";
+
+    specialtyDoctors[specialty].forEach(doc => {
+        let card = document.createElement("div");
+        card.className = "doctor-card";
+
+        card.innerHTML = `
+            <img src="${doc.img}">
+            <div>
+                <div style="font-weight:600; color: var(--text-main);">${doc.name} <span style="color: var(--color-accent);">${doc.rating}</span></div>
+                <small style="color: var(--text-muted);">${doc.expertise}</small>
+            </div>
+        `;
+
+        card.onclick = () => openDoctorPopup(doc);
+        list.appendChild(card);
+    });
+
+    revealDoctorCards();
+}
+
+document.querySelectorAll(".special-card").forEach(card => {
+    card.onclick = (e) => {
+        // Prevent image link navigation if any
+        e.preventDefault(); 
+        showDoctors(card.dataset.specialty)
+    };
+});
+
+/* POPUP (Logic unchanged, HTML structure updated for new colors/styles) */
+const doctorOverlay = document.getElementById('doctorOverlay');
+const popupBox = document.getElementById('popupBox');
+
+function openDoctorPopup(doc) {
+    popupBox.innerHTML = `
+        <div class="popup-doc-top">
+            <img src="${doc.img}">
+            <div>
+                <div style="font-size:20px;font-weight:700;">${doc.name}</div>
+                <div>${doc.rating}</div>
+                <small style="color:var(--text-muted);">${doc.expertise}</small>
+            </div>
+        </div>
+
+        <div class="achievement"><b>Achievements:</b><br>${doc.achievement}</div>
+        <div class="expertise"><b>Expertise:</b><br>${doc.expertise}</div>
+
+        <h3 style="margin-top:20px; color: var(--text-main); font-weight: 600;">Feedback</h3>
+        ${doc.feedback.map(f => `<div class="feedback-card">${f}</div>`).join("")}
+        <div class="book-btn">Book Appointment</div>
+        <div class="close-btn" id="closePopup">Close</div>
+    `;
+
+    doctorOverlay.style.display = "flex";
+
+    setTimeout(() => {
+        document.querySelectorAll(".feedback-card").forEach((f, i) => {
+            setTimeout(() => f.classList.add("show"), i * 150);
+        });
+    }, 200);
+    
+    // Attach event listener inside the function where closePopup exists
+    const closePopup = document.getElementById('closePopup');
+    closePopup.onclick = () => (doctorOverlay.style.display = "none");
+}
+
+doctorOverlay.onclick = e => {
+    if (e.target.id === "doctorOverlay")
+        doctorOverlay.style.display = "none";
+};
+
+/* SCROLL REVEAL (Logic unchanged) */
+function revealDoctorCards() {
+    const cards = document.querySelectorAll(".doctor-card");
+    cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) {
+            card.classList.add("show");
+        }
+    });
+}
+window.addEventListener("scroll", revealDoctorCards);
+
+</script>
+</body>
+</html>

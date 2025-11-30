@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab Dashboard — LifeCord</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #FF6B35;
+      --primary-dark: #E64A19;
+      --gradient-primary: linear-gradient(135deg, #FF8C42 0%, #FF5E3A 100%);
+      --bg-body: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #1F2937;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      
+      --success: #10B981;
+      --warning: #F59E0B;
+      --info: #3B82F6;
+      
+      --radius: 20px;
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; outline: none; }
+    body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; padding: 20px; }
+
+    /* Header */
+    .header {
+      background: var(--card-bg);
+      padding: 20px 30px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      animation: slideDown 0.5s ease-out;
+      position: relative;
+      z-index: 100;
+    }
+    .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+    .user-profile { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-muted); cursor: pointer; }
+    .avatar { width: 40px; height: 40px; background: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; background: var(--gradient-primary); font-weight: 600; }
+
+    /* Profile Dropdown */
+    .dropdown-menu {
+        position: absolute;
+        top: 70px;
+        right: 30px;
+        width: 240px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        padding: 10px;
+        display: none;
+        flex-direction: column;
+        z-index: 200;
+        border: 1px solid #F1F5F9;
+        animation: fadeDown 0.2s ease;
+    }
+    .dropdown-menu.show { display: flex; }
+    
+    .profile-info-header {
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 5px;
+    }
+    .profile-name { font-weight: 700; color: var(--text-main); font-size: 0.95rem; }
+    .profile-role { font-size: 0.75rem; color: var(--text-muted); }
+
+    .dropdown-item {
+        padding: 12px 15px;
+        border-radius: 10px;
+        color: var(--text-main);
+        text-decoration: none;
+        display: flex; align-items: center; gap: 10px;
+        font-size: 0.9rem; font-weight: 500;
+        transition: background 0.2s;
+        cursor: pointer;
+    }
+    .dropdown-item:hover { background: #F8FAFC; color: var(--primary); }
+    .dropdown-item.danger:hover { background: #FEF2F2; color: var(--primary-dark); }
+
+    /* Cards */
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+      animation: fadeIn 0.6s ease-out;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s, box-shadow 0.3s;
+      border: 1px solid transparent;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px -5px rgba(255, 107, 53, 0.15); border-color: var(--primary); }
+    .card h2 { font-size: 1rem; color: var(--text-muted); font-weight: 500; margin-bottom: 10px; }
+    .value { font-size: 2.5rem; font-weight: 700; color: var(--text-main); }
+
+    /* Main Content Area */
+    .main-section {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 30px;
+        box-shadow: var(--shadow);
+        animation: slideUp 0.7s ease-out;
+        margin-bottom: 30px;
+    }
+
+    /* Controls */
+    .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; }
+    .filter-btn {
+        padding: 8px 20px; border-radius: 30px; border: 1px solid var(--border);
+        background: white; color: var(--text-muted); cursor: pointer; font-weight: 500;
+        transition: all 0.2s;
+    }
+    .filter-btn:hover { background: #FFF7ED; color: var(--primary); border-color: var(--primary); }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3); }
+
+    /* Search & Add Group */
+    .actions-group { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+    
+    /* BUG FIX: Specific class for Add Patient button to avoid conflict with filter logic */
+    .btn-add-patient {
+        padding: 8px 20px; border-radius: 30px; border: none;
+        background: var(--primary); color: white; cursor: pointer; font-weight: 500;
+        transition: all 0.2s; box-shadow: 0 4px 10px rgba(255, 107, 53, 0.3);
+        display: flex; align-items: center; gap: 8px;
+    }
+    .btn-add-patient:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+    .search-box { position: relative; width: 250px; }
+    .search-box input {
+        width: 100%; padding: 10px 15px 10px 40px; border-radius: 30px; border: 1px solid var(--border);
+        font-size: 0.9rem; transition: 0.2s;
+    }
+    .search-box input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1); }
+    .search-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+
+    /* Table */
+    .table-wrapper { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 15px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 2px solid var(--bg-body); font-weight: 600; }
+    td { padding: 15px; border-bottom: 1px solid var(--bg-body); font-size: 0.9rem; color: var(--text-main); }
+    tr { transition: background 0.2s; cursor: pointer; }
+    tr:hover { background: #FFF7ED; }
+    
+    .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .status-pending { background: #FEF3C7; color: #D97706; }
+    .status-completed { background: #DCFCE7; color: #166534; }
+
+    /* --- UPLOAD SECTION (Bottom) --- */
+    .upload-section {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 30px;
+        box-shadow: var(--shadow);
+        animation: slideUp 0.8s ease-out;
+    }
+    .upload-header h3 { margin: 0 0 5px 0; font-size: 1.2rem; color: var(--text-main); }
+    .upload-header p { margin: 0 0 20px 0; color: var(--text-muted); font-size: 0.9rem; }
+
+    .upload-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; align-items: start; }
+    
+    .patient-id-input {
+        width: 100%; padding: 15px; border: 1px solid var(--border); border-radius: 12px;
+        font-size: 1rem; transition: 0.2s; background: var(--bg-body);
+    }
+    .patient-id-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1); }
+
+    .upload-area {
+        border: 2px dashed var(--border); border-radius: 16px; padding: 40px;
+        text-align: center; transition: all 0.3s; cursor: pointer; background: var(--bg-body);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .upload-area:hover { border-color: var(--primary); background: #FFF7ED; }
+    .upload-area i { font-size: 2.5rem; color: var(--primary); margin-bottom: 15px; }
+    .upload-text { color: var(--text-muted); font-size: 0.9rem; }
+    #fileInput { display: none; }
+
+    .file-preview-pane {
+        display: none; margin-top: 20px; padding: 15px; background: #E0F2FE; border-radius: 12px;
+        color: #0369A1; font-size: 0.95rem; align-items: center; justify-content: space-between;
+        border: 1px solid #BAE6FD; animation: fadeIn 0.3s;
+    }
+
+    .action-btn {
+        width: 100%; padding: 15px; border: none; border-radius: 12px;
+        background: var(--gradient-primary); color: white; font-size: 1rem; font-weight: 600;
+        margin-top: 20px; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(255, 107, 53, 0.4); }
+    .action-btn:active { transform: scale(0.98); }
+
+
+    /* --- MODAL --- */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); z-index: 1000;
+        display: none; justify-content: center; align-items: center;
+        backdrop-filter: blur(5px);
+    }
+    .modal {
+        background: white; width: 90%; max-width: 500px;
+        padding: 30px; border-radius: 24px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+    .modal-header h3 { margin: 0; color: var(--text-main); font-size: 1.4rem; }
+    .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); transition: color 0.2s; }
+    .close-btn:hover { color: var(--primary-dark); }
+
+    .patient-details { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px; }
+    .detail-item label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .detail-item p { font-size: 1rem; font-weight: 600; color: var(--text-main); }
+
+    /* Demo Report Preview */
+    .report-preview {
+        background: #F3F4F6; border-radius: 12px; padding: 15px; margin-top: 20px;
+        border: 1px solid #E5E7EB;
+    }
+    .report-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .report-file { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text-main); }
+
+    /* Animations */
+    @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes popUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Mobile tweaks */
+    @media (max-width: 768px) {
+        .upload-grid { grid-template-columns: 1fr; }
+        .controls { flex-direction: column; align-items: stretch; }
+        .actions-group { justify-content: space-between; }
+        .search-box { width: 100%; }
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="logo"><i class="fas fa-flask"></i> LifeCord Lab</div>
+    <div class="user-profile" onclick="toggleProfileMenu(event)">
+        <span id="headerUserName">Dr. Pathology</span>
+        <div class="avatar" id="headerUserAvatar">DP</div>
+    </div>
+    <!-- Profile Dropdown -->
+    <div class="dropdown-menu" id="profileDropdown">
+        <!-- Dynamic Profile Header -->
+        <div class="profile-info-header">
+            <div class="profile-name" id="dropdownName">Dr. Pathology</div>
+            <div class="profile-role">Lab Administrator</div>
+        </div>
+        <a class="dropdown-item"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a class="dropdown-item"><i class="fas fa-cog"></i> Settings</a>
+        <a class="dropdown-item danger" onclick="alert('Logged Out')"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+</header>
+
+<!-- Stats -->
+<div class="card-container">
+  <div class="card">
+      <h2>Reports Today</h2>
+      <p class="value" id="valToday" style="color: var(--primary);">42</p>
+  </div>
+  <div class="card">
+      <h2>Pending</h2>
+      <p class="value" id="valPending" style="color: #F59E0B;">15</p>
+  </div>
+  <div class="card">
+      <h2>Completed</h2>
+      <p class="value" id="valCompleted" style="color: #10B981;">27</p>
+  </div>
+</div>
+
+<!-- Main Content (List) -->
+<div class="main-section">
+    <div class="controls">
+        <div class="filters">
+            <button class="filter-btn active" data-status="all">All Patients</button>
+            <button class="filter-btn" data-status="pending">Pending</button>
+            <button class="filter-btn" data-status="completed">Completed</button>
+        </div>
+        
+        <div class="actions-group">
+            <!-- Bug Fix: Changed class to btn-add-patient so it doesn't trigger filter logic -->
+            <button class="btn-add-patient" onclick="openAddPatientModal()">
+                <i class="fas fa-user-plus"></i> Add Patient
+            </button>
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchBox" placeholder="Search patient ID or Name...">
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Patient ID</th>
+                    <th>Name</th>
+                    <th>Test Type</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="reportTable">
+                <!-- Rows generated by JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Upload Section (Separate) -->
+<div class="upload-section">
+    <div class="upload-header">
+        <h3>Upload Completed Report</h3>
+        <p>Enter Patient ID and attach the generated lab report to auto-complete request.</p>
+    </div>
+
+    <div class="upload-grid">
+        <!-- Left: Input -->
+        <div>
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-muted); font-size:0.9rem;">Patient ID</label>
+            <input type="text" id="uploadPatientId" class="patient-id-input" placeholder="e.g. LC-1005">
+        </div>
+
+        <!-- Right: File Drop -->
+        <div>
+            <label for="fileInput" class="upload-area">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <div class="upload-text" style="font-weight: 600; margin-bottom: 5px;">Choose file or drag here</div>
+                <div class="upload-text" style="font-size: 0.8rem; opacity: 0.7;">Supported formats: PDF, JPG, PNG</div>
+            </label>
+            <input type="file" id="fileInput" onchange="handleFileSelect()">
+            
+            <!-- Preview Pane -->
+            <div id="filePreview" class="file-preview-pane">
+                <span id="fileName" style="font-weight:600;">report.pdf</span>
+                <i class="fas fa-check-circle" style="color:#0284C7;"></i>
+            </div>
+            
+            <button class="action-btn" onclick="uploadReport()">
+                Upload Report
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Patient Details Modal (Read Only Details + Report View) -->
+<div id="patientModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Patient Details</h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        
+        <div class="patient-details">
+            <div class="detail-item"><label>Name</label><p id="pName">John Doe</p></div>
+            <div class="detail-item"><label>Patient ID</label><p id="pId">#LC-2024</p></div>
+            <div class="detail-item"><label>Age / Gender</label><p id="pAge">34 / M</p></div>
+            <div class="detail-item"><label>Test Type</label><p id="pTest">CBC Hemogram</p></div>
+        </div>
+        
+        <div id="modalStatusArea" style="padding-top:15px; border-top:1px solid var(--border);">
+            <!-- Status or Report Preview will be shown here -->
+        </div>
+
+        <button class="action-btn" style="background:white; color:var(--text-muted); border:1px solid var(--border); box-shadow:none; margin-top:10px;" onclick="closeModal()">Close</button>
+    </div>
+</div>
+
+<!-- Add Patient Modal -->
+<div id="addPatientModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>Add New Patient</h3>
+            <button class="close-btn" onclick="closeAddPatientModal()">&times;</button>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:15px;">
+            <div>
+                <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; display:block;">Patient ID</label>
+                <input type="text" id="newPId" class="patient-id-input" placeholder="LC-XXXX">
+            </div>
+            <div>
+                <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; display:block;">Full Name</label>
+                <input type="text" id="newPName" class="patient-id-input" placeholder="Patient Name">
+            </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
+                <div>
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; display:block;">Age</label>
+                    <input type="number" id="newPAge" class="patient-id-input" placeholder="Age">
+                </div>
+                <div>
+                    <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; display:block;">Gender</label>
+                    <select id="newPGender" class="patient-id-input" style="height:52px;">
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                        <option value="O">Other</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:5px; display:block;">Test Required</label>
+                <input type="text" id="newPTest" class="patient-id-input" placeholder="e.g. Blood Test">
+            </div>
+            <button class="action-btn" onclick="saveNewPatient()">Add Patient</button>
+        </div>
+    </div>
+</div>
+
+<script>
+  // Data
+  const reports = [
+    { id: "LC-1001", name: "Arjun Mehta", age: "29 / M", test: "CBC Hemogram", status: "Pending", date: "2025-11-28" },
+    { id: "LC-1002", name: "Sneha Kapoor", age: "45 / F", test: "Lipid Profile", status: "Completed", date: "2025-11-28" },
+    { id: "LC-1003", name: "Rohan Das", age: "62 / M", test: "HbA1c", status: "Pending", date: "2025-11-28" },
+    { id: "LC-1004", name: "Priya Sharma", age: "24 / F", test: "Thyroid Profile", status: "Completed", date: "2025-11-27" },
+    { id: "LC-1005", name: "Vikram Singh", age: "38 / M", test: "Liver Function Test", status: "Pending", date: "2025-11-27" },
+    { id: "LC-1006", name: "Anjali Menon", age: "31 / F", test: "Vitamin D", status: "Completed", date: "2025-11-26" },
+    { id: "LC-1007", name: "Rahul Verma", age: "55 / M", test: "Kidney Function", status: "Pending", date: "2025-11-26" },
+    { id: "LC-1008", name: "Kavita Reddy", age: "42 / F", test: "MRI Brain", status: "Pending", date: "2025-11-25" },
+    { id: "LC-1009", name: "Amitabh Roy", age: "70 / M", test: "X-Ray Chest", status: "Completed", date: "2025-11-25" },
+    { id: "LC-1010", name: "Zoya Khan", age: "28 / F", test: "Blood Sugar", status: "Completed", date: "2025-11-24" }
+  ];
+
+  const tableBody = document.getElementById("reportTable");
+  const fileInput = document.getElementById("fileInput");
+  const filePreview = document.getElementById("filePreview");
+  const fileNameSpan = document.getElementById("fileName");
+  
+  // Stats Elements
+  const valPending = document.getElementById('valPending');
+  const valCompleted = document.getElementById('valCompleted');
+  const valToday = document.getElementById('valToday');
+
+  function updateStats() {
+      const pending = reports.filter(r => r.status === "Pending").length;
+      const completed = reports.filter(r => r.status === "Completed").length;
+      valPending.innerText = pending;
+      valCompleted.innerText = completed;
+      // Keeping 'Reports Today' static or updating if logic requires
+      // valToday.innerText = reports.length; 
+  }
+
+  // --- Render Table ---
+  function loadTable(filter = "all") {
+    tableBody.innerHTML = "";
+    let filtered = reports;
+
+    // Check if filter is coming from button click (string) or reuse existing active filter
+    if (filter === "all" && document.querySelector(".filter-btn.active")) {
+        filter = document.querySelector(".filter-btn.active").dataset.status;
+    }
+
+    if (filter !== "all") {
+        const statusFilter = filter.charAt(0).toUpperCase() + filter.slice(1);
+        filtered = reports.filter(r => r.status === statusFilter);
+    }
+
+    const search = document.getElementById("searchBox").value.toLowerCase();
+    filtered = filtered.filter(r =>
+      r.name.toLowerCase().includes(search) ||
+      r.id.toLowerCase().includes(search)
+    );
+
+    filtered.forEach(r => {
+      const statusClass = r.status === "Pending" ? "status-pending" : "status-completed";
+      tableBody.innerHTML += `
+      <tr onclick="openModal('${r.id}')">
+        <td style="font-weight: 600; color: var(--primary);">${r.id}</td>
+        <td>${r.name}</td>
+        <td>${r.test}</td>
+        <td>${r.date}</td>
+        <td><span class="status-pill ${statusClass}">${r.status}</span></td>
+        <td><i class="fas fa-chevron-right" style="color: var(--text-muted);"></i></td>
+      </tr>`;
+    });
+    
+    updateStats();
+  }
+
+  // --- Modal Logic (View Details Only) ---
+  function openModal(id) {
+      const selectedPatient = reports.find(r => r.id === id);
+      if (!selectedPatient) return;
+
+      document.getElementById("pName").innerText = selectedPatient.name;
+      document.getElementById("pId").innerText = selectedPatient.id;
+      document.getElementById("pAge").innerText = selectedPatient.age;
+      document.getElementById("pTest").innerText = selectedPatient.test;
+      
+      const statusArea = document.getElementById("modalStatusArea");
+      
+      if(selectedPatient.status === "Completed") {
+          // Show PDF Preview for Completed
+          statusArea.innerHTML = `
+            <h4 style="margin-bottom: 10px; color: var(--text-main);">Report Status</h4>
+            <div class="report-preview">
+                <div class="report-header">
+                    <div class="report-file"><i class="fas fa-file-pdf" style="color: #F40F02; font-size: 1.5rem;"></i> Lab_Report.pdf</div>
+                    <span class="status-pill status-completed">Ready</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Generated on ${selectedPatient.date}</p>
+            </div>
+            <button class="action-btn" style="background: var(--text-main); box-shadow: none;" onclick="alert('Opening PDF Viewer...')">
+                <i class="fas fa-eye"></i> View Report
+            </button>
+          `;
+      } else {
+          // Just show status for Pending
+          statusArea.innerHTML = `
+            <div style="text-align:center; padding: 20px; background: #FEF3C7; border-radius: 12px; color: #D97706;">
+                <i class="fas fa-clock" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <h4 style="margin:0;">Report Pending</h4>
+                <p style="font-size:0.85rem; margin-top:5px;">Please upload the report using the section below.</p>
+            </div>
+          `;
+      }
+      
+      document.getElementById("patientModal").style.display = "flex";
+  }
+
+  function closeModal() {
+      document.getElementById("patientModal").style.display = "none";
+  }
+
+  // --- Add Patient Modal Logic ---
+  function openAddPatientModal() {
+      // Reset fields with random ID suggestion
+      document.getElementById('newPId').value = 'LC-' + Math.floor(1000 + Math.random() * 9000);
+      document.getElementById('newPName').value = '';
+      document.getElementById('newPAge').value = '';
+      document.getElementById('newPTest').value = '';
+      document.getElementById("addPatientModal").style.display = "flex";
+  }
+
+  function closeAddPatientModal() {
+      document.getElementById("addPatientModal").style.display = "none";
+  }
+
+  function saveNewPatient() {
+      const id = document.getElementById('newPId').value;
+      const name = document.getElementById('newPName').value;
+      const age = document.getElementById('newPAge').value;
+      const gender = document.getElementById('newPGender').value;
+      const test = document.getElementById('newPTest').value;
+
+      if(!id || !name || !age || !test) {
+          alert("Please fill all fields");
+          return;
+      }
+
+      // Add to array
+      reports.unshift({
+          id: id,
+          name: name,
+          age: `${age} / ${gender}`,
+          test: test,
+          status: "Pending",
+          date: new Date().toISOString().split('T')[0]
+      });
+
+      // Switch view to "All" so the new patient is visible immediately
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      document.querySelector('.filter-btn[data-status="all"]').classList.add("active");
+
+      loadTable("all"); // Refresh list
+      closeAddPatientModal();
+      alert("Patient added successfully!");
+  }
+
+
+  // --- File Upload Logic (Bottom Section) ---
+  function handleFileSelect() {
+      const file = fileInput.files[0];
+      if (file) {
+          fileNameSpan.innerText = file.name;
+          filePreview.style.display = "flex";
+      }
+  }
+
+  function uploadReport() {
+      const pId = document.getElementById("uploadPatientId").value.trim();
+      if (!pId) { alert("Please enter Patient ID"); return; }
+      
+      if (!fileInput.files[0]) { alert("Please select a file first!"); return; }
+      
+      // Check if patient exists
+      const pIndex = reports.findIndex(r => r.id === pId);
+      if (pIndex === -1) { alert("Patient ID not found!"); return; }
+      
+      if (reports[pIndex].status === "Completed") { alert("Report already exists for this patient."); return; }
+
+      // Simulate Upload
+      const btn = document.querySelector('.action-btn');
+      const originalText = btn.innerText;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+      
+      setTimeout(() => {
+          // Update Logic
+          reports[pIndex].status = "Completed";
+          reports[pIndex].date = new Date().toISOString().split('T')[0]; // Update date to today
+          
+          alert(`Report uploaded for ID: ${pId} successfully!`);
+          
+          // Switch to "Completed" tab or refresh current view
+          // Keeping current view is better UX usually, but ensure status update is visible
+          loadTable(); 
+          
+          // Reset Form
+          document.getElementById("uploadPatientId").value = "";
+          fileInput.value = "";
+          filePreview.style.display = "none";
+          btn.innerText = originalText;
+      }, 1500);
+  }
+
+  // --- Profile Menu ---
+  function toggleProfileMenu(e) {
+      e.stopPropagation();
+      const menu = document.getElementById("profileDropdown");
+      menu.classList.toggle("show");
+  }
+
+  window.onclick = function(event) {
+      const menu = document.getElementById("profileDropdown");
+      if (!event.target.closest('.user-profile') && !event.target.closest('.dropdown-menu')) {
+          if (menu.classList.contains('show')) {
+              menu.classList.remove('show');
+          }
+      }
+      if (event.target.classList.contains('modal-overlay')) {
+          closeModal();
+          closeAddPatientModal();
+      }
+  }
+
+  // --- Event Listeners for Filters ---
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      loadTable(btn.dataset.status);
+    });
+  });
+
+  document.getElementById("searchBox").addEventListener("input", () => {
+    loadTable();
+  });
+
+  // Initial Load
+  loadTable();
+</script>
+
+</body>
+</html>

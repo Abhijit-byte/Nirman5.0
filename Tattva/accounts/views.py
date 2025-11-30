@@ -20,6 +20,51 @@ otp_storage = {}
 # ----------------------------------------------------------------------
 # --- PATIENT FLOW VIEWS (OTP-based) ---
 # ----------------------------------------------------------------------
+def landing(request):
+    return render(request, 'accounts/landing.html')
+def send_otp_page(request):
+    return render(request, 'accounts/send_otp.html')
+def doctors_loginpage_view(request):
+    return render(request, 'accounts/doctors_loginpage.html')
+def verify_otp_page(request):
+    return render(request, 'accounts/verify_otp.html')
+def hospital_owner_login_page(request):
+    return render(request, 'accounts/hospital_loginpage.html')
+def doctor_booking_page(request):
+    return render(request, 'accounts/doctor_booking.html')
+def pharmacy_login(request):
+    return render(request, 'accounts/pharmacy_loginpage.html')
+def pharmacy_dashboard(request):
+    return render(request, 'accounts/pharmacy_dashboard.html')
+def lab_login(request):
+    return render(request, 'accounts/lab_loginpage.html')
+def lab_dashboard(request):
+    return render(request, 'accounts/lab_dashboard.html')
+def medical_records(request):
+    return render(request, 'accounts/Medicine.html')
+def labs(request):
+    return render(request, 'accounts/Labs.html')
+def records(request):
+    return render(request, 'accounts/records.html')
+def emi_payment(request):
+    return render(request, 'accounts/emi.html')
+def ai_bill_analyzer(request):
+    return render(request, 'accounts/aibill.html')
+def payment(request):
+    return render(request, 'accounts/payment.html')
+def doctor_dashboard(request):
+    doctor_id = request.session.get("doctor_id")
+
+
+    if not doctor_id:
+        return redirect("doctor_login")  # protection if session empty
+
+    doctor = Doctor.objects.get(id=doctor_id)
+
+    return render(request, "accounts/doctors_dashboard.html", {
+        "doctor_name": doctor.name,
+    })
+
 
 def send_otp_page(request):
     return render(request, 'accounts/send_otp.html')
@@ -27,12 +72,31 @@ def send_otp_page(request):
 def verify_otp_page(request):
     return render(request, 'accounts/verify_otp.html')
 
+from django.shortcuts import render, redirect
+from accounts.models import Patient # Adjust the import path for your Patient model
+
 def dashboard(request):
     # Patient Dashboard - Requires phone session key
+    
+    # 1. Check if the user is logged in
     if 'phone' not in request.session:
         return redirect('/')
+        
+    phone_number = request.session.get('phone')
+    
+    # 2. Retrieve the Patient object from the database
+    try:
+        current_patient = Patient.objects.get(phone=phone_number)
+    except Patient.DoesNotExist:
+        # Handle case: User is logged in but patient record is missing (shouldn't happen)
+        # We can log them out or redirect to an error page.
+        # For security, we'll redirect back home.
+        return redirect('/')
+
+    # 3. Pass the Patient object to the template context
     return render(request, 'accounts/dashboard.html', {
-        'phone': request.session.get('phone')
+        'patient': current_patient,
+        # The phone number is now easily accessible via patient.phone
     })
 
 @require_http_methods(["POST"])
@@ -123,32 +187,169 @@ def verify_otp(request):
 # ----------------------------------------------------------------------
 
 #@login_required 
-#@login_required 
-def hospital_dashboard(request, hospital_id): 
-    """
-    TEMPORARY FULL BYPASS: Only fetches the Hospital for context to allow 
-    frontend rendering. Authorization is skipped.
-    """
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login 
+from .models import HospitalOwner, Hospital # Assuming these models exist
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login 
+ # Ensure HospitalAccess model is used
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login 
+# Import both your CustomUser model (for staff) and Hospital model
+
+# We will use the Hospital model itself to store the facility-level password for simplicity, 
+# or you can use a dedicated HospitalAccess model if preferred.
+
+# In LIFE-CORD/accounts/views.py
+
+import json
+from django.http import JsonResponse, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login 
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+
+# In LIFE-CORD/mobile_otp_login/accounts/views.py
+
+import json
+from django.http import JsonResponse, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login 
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+# Import the specific models needed
+from .models import HospitalOwner, Hospital 
+# NOTE: If you are not using Django's main auth system, you will need a 
+# Custom Authentication Backend or use session management manually. 
+# For simplicity, we assume you have a generic User model (e.g., CustomUser) 
+# to link to the session for @login_required to work, but we will focus on 
+# the HospitalOwner check only.
+
+# In LIFE-CORD/mobile_otp_login/accounts/views.py
+
+import json
+from django.http import JsonResponse, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login 
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+# Import the specific models needed from your existing models.py
+from .models import HospitalOwner, Hospital, HospitalOwner
+
+
+# --- RENDER VIEW (To open the login page) ---
+# In LIFE-CORD/mobile_otp_login/accounts/views.py
+
+import json
+from django.http import JsonResponse, HttpResponseForbidden
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+# --- FIXED IMPORT ---
+from django.contrib.auth.models import User
+from .models import HospitalOwner, Hospital 
+# --------------------
+
+
+# --- RENDER VIEW (No change) ---
+def render_hospital_login(request):
+    """Renders the main hospital login page."""
+    return render(request, 'accounts/hospital_loginpage.html')
+
+
+# --- DEDICATED API VIEW (Hospital Owner Only) ---
+@csrf_exempt
+def hospital_owner_login_api(request):
+    if request.method != 'POST':
+        return JsonResponse({'message': 'Only POST requests are allowed.'}, status=405)
+
     try:
-        # 1. Fetch the Hospital object based on the URL ID
-        # THIS IS THE ONLY DB QUERY WE RUN in the template view now.
-        hospital = get_object_or_404(Hospital, id=hospital_id)
-        
-        # 2. Skip ALL original authorization logic (HospitalOwner, user checks)
-        #    since we are not logged in.
-        
-    except Hospital.DoesNotExist:
-        # If the ID is invalid, return a 404
-        return JsonResponse({'error': f'Hospital with ID {hospital_id} not found'}, status=404) 
+        data = json.loads(request.body)
+        owner_username = data.get('nin') # Using 'nin' from frontend as the username/login_id
+        password = data.get('password')
+    except json.JSONDecodeError:
+        return JsonResponse({'message': 'Invalid JSON format'}, status=400)
 
-    # 3. Render the dashboard, passing the verified ID and NAME
-    return render(request, 'accounts/hospitaldashboard2.html', {
-        'hospital_id': hospital_id,
-        'hospital_name': hospital.name
+    # --- AUTHENTICATION: HOSPITAL OWNER LOGIN ---
+    try:
+        # 1. Look up the HospitalOwner record by username
+        owner_instance = HospitalOwner.objects.get(username=owner_username)
+
+        # 🚨 WARNING: INSECURE PASSWORD CHECK! (Kept as per constraint)
+        if owner_instance.password == password:
+
+            # Hospital Owner Login SUCCESS
+            hospital_id = owner_instance.hospital.id
+
+            # 2. Log in the associated specific User account for session tracking
+            # ASSUMPTION: The HospitalOwner has a corresponding Django User (User model) 
+            # with the same username for session tracking.
+            try:
+                # Use the imported Django 'User' model
+                system_user = User.objects.get(username=owner_username)
+                login(request, system_user) # Establish Django session
+            except User.DoesNotExist:
+                return JsonResponse({'message': 'Owner account found, but session user is missing (User model).'}, status=500)
+
+            # 3. Redirect the owner to the specialized admin dashboard
+            redirect_url = f'/accounts/dashboard/admin/{hospital_id}/'
+
+            return JsonResponse({
+                'message': f'Facility Access Granted: {owner_instance.hospital.name}',
+                'redirectUrl': redirect_url
+            }, status=200)
+
+        else:
+             # Password mismatch
+             raise HospitalOwner.DoesNotExist # Fails the check, jumps to final failure block
+
+    except HospitalOwner.DoesNotExist:
+        # No HospitalOwner found or password mismatch
+        pass
+
+    # --- FINAL FAILURE ---
+    return JsonResponse({'message': 'Invalid ID or Password.'}, status=401)
+
+
+# --- DASHBOARD VIEW (Authorization Enforced) ---
+@login_required
+def hospital_owner_dashboard(request, hospital_id):
+    """Checks for both authentication (@login_required) and authorization (ID/Role)."""
+
+    # 1. Get the Hospital instance
+    hospital = get_object_or_404(Hospital, id=hospital_id)
+
+    # 2. Authorization Check: Ensure the logged-in user is the actual owner of this hospital
+    try:
+        # Retrieve the HospitalOwner instance associated with the requested Hospital
+        owner_instance = HospitalOwner.objects.get(hospital=hospital)
+
+        # Check if the logged-in User's username matches the HospitalOwner's username
+        if request.user.username != owner_instance.username:
+            # User is logged in, but not as the owner of this specific hospital
+            return HttpResponseForbidden("Access Denied: Not the authorized Hospital Owner.")
+
+    except HospitalOwner.DoesNotExist:
+        # Hospital has no linked owner record
+        return HttpResponseForbidden("Configuration Error: Hospital Owner not defined.")
+
+
+    # Authorization Passed
+    return render(request, 'accounts/hospitaldashboard.html', {
+        'hospital_id': hospital_id,          # <--- ADD THIS LINE
+        'hospital_name': hospital.name,      # <--- ADDED hospital_name for the HTML title/topbar
+        'owner_username': request.user.username
     })
-
-
-# ----------------------------------------------------------------------
+    # ----------------------------------------------------------------------
 # --- DASHBOARD API VIEW (WITH FILTERING) ---
 # ----------------------------------------------------------------------
 
@@ -281,3 +482,56 @@ def doctor_dashboard_view(request, hospital_id): # <-- NEW NAME HERE
     })
 
 # NOTE: The API view `get_dashboard_data` is fine as it is.
+
+
+from django.http import JsonResponse
+from django.contrib import messages
+import json
+
+def doctor_login(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        doc_id = data.get("doc_id")
+        pin = data.get("pin")
+
+        doctor = Doctor.objects.filter(id=doc_id, pin=pin).first()
+
+        if doctor:
+            request.session["doctor_id"] = doctor.id
+            request.session["doctor_name"] = doctor.name  # store name in session
+
+            return JsonResponse({
+                "status": "success",
+                "doctor_name": doctor.name,                 # pass to JS
+                "redirect_url": "/doctor/dashboard/"        # your path
+            })
+
+        return JsonResponse({"status": "error", "message": "Invalid ID or PIN"})
+    
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def update_doctor_availability(request):
+    try:
+        doctor_id = request.session.get("doctor_id")
+        if not doctor_id:
+            return JsonResponse({"status": "error", "message": "Not logged in"}, status=401)
+
+        data = json.loads(request.body)
+        status = data.get("is_available")
+
+        doctor = Doctor.objects.get(id=doctor_id)
+        doctor.available = status
+        doctor.save()
+
+        return JsonResponse({"status": "success", "is_available": doctor.available})
+
+    except Doctor.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Doctor not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+

@@ -351,7 +351,7 @@
             <!-- Header -->
             <header class="top-header">
                 <div class="welcome-text">
-                    <h1 id="greeting">Good Morning, <span id="docNameDisplay">Dr. Sharma</span> 👋</h1>
+                    <h1 id="greeting">Good Morning, <span id="docNameDisplay">{{ doctor_name }}</span> 👋</h1>
                     <p>You have <span id="headerRemaining">7</span> patients remaining today.</p>
                 </div>
                 
@@ -370,9 +370,11 @@
                     
                     <!-- 3. Doctor Profile -->
                     <div class="doc-profile" onclick="openProfileModal()">
-                        <img src="https://ui-avatars.com/api/?name=Dr+Sharma&background=E0F2FE&color=0284C7" class="doc-img" alt="Profile">
+                        <img src="https://ui-avatars.com/api/?name={{ doctor_name|urlencode }}&background=E0F2FE&color=0284C7"
+     class="doc-img" alt="Profile">
+
                         <div style="display:none; @media(min-width:768px){display:block;}">
-                            <div style="font-weight:700; font-size:0.9rem;" id="docNavName">Dr. Sharma</div>
+                            <div style="font-weight:700; font-size:0.9rem;" id="docNavName">{{ doctor_name }}</div>
                         </div>
                     </div>
                 </div>
@@ -539,7 +541,7 @@
                 <input type="text" id="editDocSpec" class="form-input" value="Cardiologist">
             </div>
             <!-- Removed Clinic Availability from here as requested -->
-            <button class="btn-full btn-primary" onclick="saveProfile()">Save Changes</button>
+            <button class="btn-full btn-primary" onclick="window.location.href='{% url 'landing' %}'">LogOut</button>
         </div>
     </div>
 
@@ -593,7 +595,7 @@
     let currentSlots = 5;
     let activePatientIndex = -1;
     let isAvailable = true; // Placeholder, set by DB on load
-    let DOCTOR_DATA = { name: "Dr. Sharma", specialization: "" }; // Placeholder, set by DB on load
+    let DOCTOR_DATA = { name: "{{ doctor_name }}", specialization: "" }; // Placeholder, set by DB on load
 
 
     // --- UTILITY FUNCTIONS ---
@@ -660,7 +662,7 @@
                 
                 // Set the greeting to use the last name (e.g., Dr. Sharma)
                 const lastName = data.name.split(' ').pop();
-                document.getElementById('greeting').innerHTML = `Good Morning, <span id="docNameDisplay">Dr. ${lastName}</span> 👋`;
+                document.getElementById('greeting').innerHTML = `Good Morning, <span id="docNameDisplay">{{ doctor_name }}</span> 👋`;
                 
                 // 2. Set initial toggle state based on DB
                 updateToggleUI(isAvailable);
